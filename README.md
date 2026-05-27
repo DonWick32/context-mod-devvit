@@ -12,7 +12,7 @@ The first scaffold intentionally performs no moderation actions. Event processin
 - `npm run test` - run unit tests
 - `npm run build` - build the Devvit server and custom post bundles
 - `npm run dev` - run `devvit playtest`
-- `npm run migrate:audit -- <legacy-config.yml>` - statically audit a legacy config before migration
+- `npm run migrate:audit -- <legacy-config.yml>` - statically audit a legacy config before migration is performed
 
 ## Current Testable Behavior
 
