@@ -1,0 +1,2855 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "AuthorCriteria": {
+            "additionalProperties": false,
+            "description": "Criteria with which to test against the author of an Activity. The outcome of the test is based on:\n\n1. All present properties passing and\n2. If a property is a list then any value from the list matching",
+            "examples": [
+                {
+                    "flairText": [
+                        "Contributor",
+                        "Veteran"
+                    ],
+                    "isMod": true,
+                    "name": [
+                        "FoxxMD",
+                        "AnotherUser"
+                    ]
+                }
+            ],
+            "minProperties": 1,
+            "properties": {
+                "age": {
+                    "description": "Test the age of the Author's account (when it was created) against this comparison\n\nThe syntax is `(< OR > OR <= OR >=) <number> <unit>`\n\n* EX `> 100 days` => Passes if Author's account is older than 100 days\n* EX `<= 2 months` => Passes if Author's account is younger than or equal to 2 months\n\nUnit must be one of [DayJS Duration units](https://day.js.org/docs/en/durations/creating)\n\n[See] https://regexr.com/609n8 for example",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?)\\s*$",
+                    "type": "string"
+                },
+                "commentKarma": {
+                    "description": "A string containing a comparison operator and a value to compare karma against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign]`\n\n* EX `> 100`  => greater than 100 comment karma\n* EX `<= 75%` => comment karma is less than or equal to 75% of **all karma**",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "description": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "An (array of) string/regular expression to test contents of an Author's profile description against\n\nIf no flags are specified then the **insensitive** flag is used by default\n\nIf using an array then if **any** value in the array passes the description test passes",
+                    "examples": [
+                        [
+                            "/test$/i",
+                            "look for this string literal"
+                        ]
+                    ]
+                },
+                "flairBackgroundColor": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "The (user) flair background color (or list of) from the subreddit to match against\n\n* If `true` then passes if ANY css background color is assigned\n* If `false` then passes if NO css background is assigned\n* If string or list of strings then color is matched, case-insensitive, without #. String may also be a regular expression enclosed in forward slashes."
+                },
+                "flairCssClass": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "A (user) flair css class (or list of) from the subreddit to match against\n\n* If `true` then passes if ANY css is assigned\n* If `false` then passes if NO css is assigned\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes.",
+                    "examples": [
+                        "red"
+                    ]
+                },
+                "flairTemplate": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "A (user) flair template id (or list of) from the subreddit to match against\n\n* If `true` then passes if ANY template is assigned\n* If `false` then passed if NO template is assigned\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "flairText": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "A (user) flair text value (or list of) from the subreddit to match against\n\n* If `true` then passes if ANY text is assigned\n* If `false` then passes if NO text is assigned\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes.",
+                    "examples": [
+                        "Approved"
+                    ]
+                },
+                "isContributor": {
+                    "description": "Is the author an approved user (contributor)?",
+                    "type": "boolean"
+                },
+                "isMod": {
+                    "description": "Is the author a moderator?",
+                    "type": "boolean"
+                },
+                "linkKarma": {
+                    "description": "A string containing a comparison operator and a value to compare link karma against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign]`\n\n* EX `> 100`  => greater than 100 link karma\n* EX `<= 75%` => link karma is less than or equal to 75% of **all karma**",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "modActions": {
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/ModNoteCriteria"
+                            },
+                            {
+                                "$ref": "#/definitions/ModLogCriteria"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "name": {
+                    "description": "A list of reddit usernames (case-insensitive) or regular expressions to match against. Do not include the \"u/\" prefix\n\n\n EX to match against /u/FoxxMD and /u/AnotherUser use [\"FoxxMD\",\"AnotherUser\"]",
+                    "examples": [
+                        "FoxxMD",
+                        "AnotherUser",
+                        "/.*Foxx./*i"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "shadowBanned": {
+                    "description": "Is the author shadowbanned?\n\nThis is determined by trying to retrieve the author's profile. If a 404 is returned it is likely they are shadowbanned",
+                    "type": "boolean"
+                },
+                "totalKarma": {
+                    "description": "A string containing a comparison operator and a value to compare against\n\nThe syntax is `(< OR > OR <= OR >=) <number>`\n\n* EX `> 100`  => greater than 100",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "userNotes": {
+                    "description": "A list of UserNote properties to check against the User Notes attached to this Author in this Subreddit (must have Toolbox enabled and used User Notes at least once)",
+                    "items": {
+                        "$ref": "#/definitions/UserNoteCriteria"
+                    },
+                    "type": "array"
+                },
+                "verified": {
+                    "description": "Does Author's account have a verified email?",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "BotConnection": {
+            "description": "Configuration required to connect to a CM Server",
+            "properties": {
+                "host": {
+                    "description": "The hostname and port the CM Server is listening on EX `localhost:8085`",
+                    "type": "string"
+                },
+                "secret": {
+                    "description": "The **shared secret** used to sign API calls from the Client to the Server.\n\nThis value should be the same as what is specified in the target CM's `api.secret` configuration",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "host",
+                "secret"
+            ],
+            "type": "object"
+        },
+        "BotCredentialsJsonConfig": {
+            "properties": {
+                "mhs": {
+                    "properties": {
+                        "apiKey": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "apiKey"
+                    ],
+                    "type": "object"
+                },
+                "reddit": {
+                    "$ref": "#/definitions/RedditCredentials"
+                },
+                "youtube": {
+                    "properties": {
+                        "apiKey": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "apiKey"
+                    ],
+                    "type": "object"
+                }
+            },
+            "required": [
+                "reddit"
+            ],
+            "type": "object"
+        },
+        "BotInstanceJsonConfig": {
+            "description": "The configuration for an **individual reddit account** ContextMod will run as a bot.\n\nMultiple bot configs may be specified (one per reddit account).\n\n**NOTE:** If `bots` is not specified in a `FILE` then a default `bot` is generated using `ENV/ARG` values IE `CLIENT_ID`, etc...but if `bots` IS specified the default is not generated.",
+            "properties": {
+                "caching": {
+                    "$ref": "#/definitions/OperatorCacheConfig",
+                    "description": "Settings to configure the default caching behavior for this bot\n\nEvery setting not specified will default to what is specified by the global operator caching config"
+                },
+                "credentials": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/RedditCredentials"
+                        },
+                        {
+                            "$ref": "#/definitions/BotCredentialsJsonConfig"
+                        }
+                    ]
+                },
+                "databaseConfig": {
+                    "properties": {
+                        "retention": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/definitions/DurationObject"
+                                },
+                                {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                }
+                            ],
+                            "description": "Number of Events, or time range of events were processed during, that should continue to be stored in the database PER SUBREDDIT\n\nAny Events falling outside this criteria will be deleted\n\nLeave unspecified to disable deleting anything\n\nThis will override operator-level retention"
+                        }
+                    },
+                    "type": "object"
+                },
+                "databaseStatisticsDefaults": {
+                    "$ref": "#/definitions/DatabaseStatisticsOperatorJsonConfig",
+                    "description": "Set defaults for the frequency time series stats are collected. Will override top-level defaults"
+                },
+                "filterCriteriaDefaults": {
+                    "$ref": "#/definitions/FilterCriteriaDefaults",
+                    "description": "Define the default behavior for all filter criteria on all checks in all subreddits\n\nDefaults to exclude mods and automoderator from checks"
+                },
+                "flowControlDefaults": {
+                    "properties": {
+                        "maxGotoDepth": {
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                },
+                "influxConfig": {
+                    "$ref": "#/definitions/InfluxConfig"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nanny": {
+                    "description": "Settings related to managing heavy API usage.",
+                    "properties": {
+                        "hardLimit": {
+                            "default": 50,
+                            "description": "When `api limit remaining` reaches this number the application will pause all event polling until the api limit is reset.",
+                            "examples": [
+                                50
+                            ],
+                            "type": "number"
+                        },
+                        "softLimit": {
+                            "default": 250,
+                            "description": "When `api limit remaining` reaches this number the application will attempt to put heavy-usage subreddits in a **slow mode** where activity processed is slowed to one every 1.5 seconds until the api limit is reset.",
+                            "examples": [
+                                250
+                            ],
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                },
+                "notifications": {
+                    "$ref": "#/definitions/NotificationConfig",
+                    "description": "Settings to configure 3rd party notifications for when behavior occurs"
+                },
+                "polling": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/PollingDefaults"
+                        },
+                        {
+                            "properties": {
+                                "shared": {
+                                    "anyOf": [
+                                        {
+                                            "items": {
+                                                "enum": [
+                                                    "modqueue",
+                                                    "newComm",
+                                                    "newSub",
+                                                    "unmoderated"
+                                                ],
+                                                "type": "string"
+                                            },
+                                            "type": "array"
+                                        },
+                                        {
+                                            "enum": [
+                                                true
+                                            ],
+                                            "type": "boolean"
+                                        }
+                                    ],
+                                    "description": "Set which polling sources should be shared among subreddits using default polling settings for that source\n\n* For `unmoderated and `modqueue` the bot will poll on **r/mod** for new activities\n* For `newSub` and `newComm` all subreddits sharing the source will be combined to poll like **r/subreddit1+subreddit2/new**\n\nIf set to `true` all polling sources will be shared,  otherwise specify which sourcs should be shared as a list"
+                                },
+                                "sharedMod": {
+                                    "default": false,
+                                    "deprecationMessage": "use `shared` instead",
+                                    "description": "DEPRECATED: See `shared`\n\n Using the ENV or ARG will sett `unmoderated` and `modqueue` on `shared`\n\n* ENV => `SHARE_MOD`\n* ARG => `--shareMod`",
+                                    "type": "boolean"
+                                },
+                                "stagger": {
+                                    "description": "If sharing a stream staggers pushing relevant Activities to individual subreddits.\n\nUseful when running many subreddits and rules are potentially cpu/memory/traffic heavy -- allows spreading out load",
+                                    "type": "number"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ],
+                    "description": "Settings related to default polling configurations for subreddits"
+                },
+                "postCheckBehaviorDefaults": {
+                    "$ref": "#/definitions/PostBehavior"
+                },
+                "queue": {
+                    "description": "Settings related to default configurations for queue behavior for subreddits",
+                    "properties": {
+                        "maxWorkers": {
+                            "default": 1,
+                            "description": "Set the number of maximum concurrent workers any subreddit can use.\n\nSubreddits may define their own number of max workers in their config but the application will never allow any subreddit's max workers to be larger than the operator\n\nNOTE: Do not increase this unless you are certain you know what you are doing! The default is suitable for the majority of use cases.",
+                            "examples": [
+                                1
+                            ],
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                },
+                "snoowrap": {
+                    "$ref": "#/definitions/SnoowrapOptions",
+                    "description": "Settings to control some [Snoowrap](https://github.com/not-an-aardvark/snoowrap) behavior.\n\nOverrides any defaults provided at top-level operator config.\n\nSet to an empty object to \"ignore\" any top-level config"
+                },
+                "subreddits": {
+                    "description": "Settings related to bot behavior for subreddits it is managing",
+                    "properties": {
+                        "dryRun": {
+                            "default": false,
+                            "description": "If `true` then all subreddits will run in dry run mode, overriding configurations\n\n* ENV => `DRYRUN`\n* ARG => `--dryRun`",
+                            "examples": [
+                                false
+                            ],
+                            "type": "boolean"
+                        },
+                        "exclude": {
+                            "description": "Names of subreddits the bot should NOT run, based on what subreddits it moderates\n\nThis setting is ignored if `names` is specified",
+                            "examples": [
+                                [
+                                    "mealtimevideos",
+                                    "programminghumor"
+                                ]
+                            ],
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "heartbeatInterval": {
+                            "default": 300,
+                            "description": "Interval, in seconds, to perform application heartbeat\n\nOn heartbeat the application does several things:\n\n* Log output with current api rate remaining and other statistics\n* Tries to retrieve and parse configurations for any subreddits with invalid configuration state\n* Restarts any bots stopped/paused due to polling issues, general errors, or invalid configs (if new config is valid)\n\n* ENV => `HEARTBEAT`\n* ARG => `--heartbeat <sec>`",
+                            "examples": [
+                                300
+                            ],
+                            "type": "number"
+                        },
+                        "names": {
+                            "description": "Names of subreddits for bot to run on\n\nIf not present or `null` bot will run on all subreddits it is a moderator of\n\n* ENV => `SUBREDDITS` (comma-separated)\n* ARG => `--subreddits <list...>`",
+                            "examples": [
+                                [
+                                    "mealtimevideos",
+                                    "programminghumor"
+                                ]
+                            ],
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "overrides": {
+                            "items": {
+                                "$ref": "#/definitions/SubredditOverrides"
+                            },
+                            "type": "array"
+                        },
+                        "wikiConfig": {
+                            "default": "botconfig/contextbot",
+                            "description": "The default relative url to the ContextMod wiki page EX `https://reddit.com/r/subreddit/wiki/<path>`\n\n* ENV => `WIKI_CONFIG`\n* ARG => `--wikiConfig <path>`",
+                            "examples": [
+                                "botconfig/contextbot"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "CacheOptions": {
+            "additionalProperties": {},
+            "description": "Configure granular settings for a cache provider with this object",
+            "properties": {
+                "auth_pass": {
+                    "description": "(`redis`) the authentication passphrase (if enabled)",
+                    "type": "string"
+                },
+                "db": {
+                    "default": 0,
+                    "description": "(`redis`) the db number to use",
+                    "examples": [
+                        0
+                    ],
+                    "type": "number"
+                },
+                "host": {
+                    "default": "localhost",
+                    "description": "(`redis`) hostname",
+                    "examples": [
+                        "localhost"
+                    ],
+                    "type": "string"
+                },
+                "max": {
+                    "default": 500,
+                    "description": "(`memory`) The maximum number of keys (unique cache calls) to store in cache\n\nWhen the maximum number of keys is reached the cache will being dropping the [least-recently-used](https://github.com/isaacs/node-lru-cache) key to keep the cache at `max` size.\n\nThis will determine roughly how large in **RAM** each `memory` cache can be, based on how large your `window` criteria are. Consider this example:\n\n* all `window` criteria in a subreddit's rules are `\"window\": 100`\n* `\"max\": 500`\n* Maximum size of **each** memory cache will be `500 x 100 activities = 50,000 activities`\n  * So the shared cache would be max 50k activities and\n  * Every additional private cache (when a subreddit configures their cache separately) will also be max 50k activities",
+                    "examples": [
+                        500
+                    ],
+                    "type": "number"
+                },
+                "port": {
+                    "default": 6379,
+                    "description": "(`redis`) port to connect on",
+                    "examples": [
+                        6379
+                    ],
+                    "type": "number"
+                },
+                "prefix": {
+                    "description": "A prefix to add to all keys",
+                    "type": "string"
+                },
+                "store": {
+                    "$ref": "#/definitions/CacheProvider"
+                },
+                "ttl": {
+                    "default": 60,
+                    "description": "The default TTL, in seconds, for the cache provider.\n\nCan mostly be ignored since TTLs are defined for each cache object",
+                    "examples": [
+                        60
+                    ],
+                    "type": "number"
+                }
+            },
+            "required": [
+                "store"
+            ],
+            "type": "object"
+        },
+        "CacheProvider": {
+            "description": "Available cache providers",
+            "enum": [
+                "memory",
+                "none",
+                "redis"
+            ],
+            "type": "string"
+        },
+        "CommentState": {
+            "description": "Different attributes a `Comment` can be in. Only include a property if you want to check it.",
+            "examples": [
+                {
+                    "op": true,
+                    "removed": false
+                }
+            ],
+            "properties": {
+                "age": {
+                    "description": "A duration and how to compare it against a value\n\nThe syntax is `(< OR > OR <= OR >=) <number> <unit>` EX `> 100 days`, `<= 2 months`\n\n* EX `> 100 days` => Passes if the date being compared is before 100 days ago\n* EX `<= 2 months` => Passes if the date being compared is after or equal to 2 months\n\nUnit must be one of [DayJS Duration units](https://day.js.org/docs/en/durations/creating)\n\n[See] https://regexr.com/609n8 for example",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(days|weeks|months|years|hours|minutes|seconds|milliseconds)\\s*$",
+                    "type": "string"
+                },
+                "approved": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/ModeratorNameCriteria"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* true/false => test whether Activity is approved or not\n* string or list of strings => test which moderator approved this Activity"
+                },
+                "authorFlairBackgroundColor": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY color\n* If `false` then passes if NO color\n* If string or list of strings then color is matched, case-insensitive, without #. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairCssClass": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY class\n* If `false` then passes if NO class\n* If string or list of strings then class is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairTemplateId": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY flair\n* If `false` then passes if NO flair\n* If string or list of strings then template id is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairText": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY flair\n* If `false` then passes if NO flair\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "createdOn": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "A relative datetime description to match the date the Activity was created\n\nMay be either:\n\n* day of the week (monday, tuesday, etc...)\n* cron expression IE `* * 15 *`\n\nSee https://crontab.guru/ for generating expressions\n\nhttps://regexr.com/6u3cc"
+                },
+                "deleted": {
+                    "type": "boolean"
+                },
+                "depth": {
+                    "description": "The (nested) level of a comment.\n\n* 0 mean the comment is at top-level (replying to submission)\n* non-zero, Nth value means the comment has N parent comments",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(days|weeks|months|years|hours|minutes|seconds|milliseconds)\\s*$",
+                    "type": "string"
+                },
+                "dispatched": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "Test whether the activity is present in dispatched/delayed activities\n\nNOTE: This is DOES NOT mean that THIS activity is from dispatch -- just that it exists there. To test whether THIS activity is from dispatch use `source`\n\n* `true` => activity exists in delayed activities\n* `false` => activity DOES NOT exist in delayed activities\n* `string` => activity exists in delayed activities with given identifier\n* `string[]` => activity exists in delayed activities with any of the given identifiers"
+                },
+                "distinguished": {
+                    "type": "boolean"
+                },
+                "filtered": {
+                    "type": "boolean"
+                },
+                "locked": {
+                    "type": "boolean"
+                },
+                "op": {
+                    "description": "Is this Comment Author also the Author of the Submission this comment is in?",
+                    "type": "boolean"
+                },
+                "removed": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/ModeratorNameCriteria"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* true/false => test whether Activity is removed or not\n* string or list of strings => test which moderator removed this Activity"
+                },
+                "reports": {
+                    "description": "A string containing a comparison operator, a value to compare against, an (optional) report type filter, an (optional) qualifier for report reason, and an (optional) time constraint\n\nThe syntax is `(< OR > OR <= OR >=) number[%] [type] [reasonQualifier] [timeValue] [timeUnit]`\n\nIf only comparison and number is given then defaults to TOTAL reports on an Activity.\n\n* EX `> 2`  => greater than 2 total reports\n\nType (optional) determines which type of reports to look at:\n\n* `mod` -- mod reports\n  * EX `> 3 mod` => greater than 3 mod reports\n* `user` -- user reports\n  * EX `> 3 user` => greater than 3 user reports\n\nReport reason qualifiers can be:\n\n* enclosed double or single quotes -- report reason contains\n  * EX `> 1 \"misinformation\" => greater than 1 report with reason containing \"misinformation\"\n* enclosed in backslashes -- match regex\n  * EX `> 1 \\harassment towards .*\\` => greater than 1 report with reason matching regex \\harassment towards .*\\\n\nType and reason qualifiers can be used together:\n\nEX `> 2 user \"misinformation\" => greater than 2 user reports with reasons containing \"misinformation\"\n\nThe time constraint filter reports created between NOW and [timeConstraint] in the past:\n\n* `> 3 in 30 minutes` => more than 3 reports created between NOW and 30 minutes ago\n* `> 2 user \"misinformation\" in 2 hours` => more than 2 user reports containing \"misinformation\" created between NOW and 2 hours ago",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)(\\s*%)?(\\s+(?:mods?|users?))?(\\s+(?:[\"'].*[\"']|\\/.*\\/))?.*(\\d+)?\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?)?\\s*$",
+                    "type": "string"
+                },
+                "score": {
+                    "description": "A string containing a comparison operator and a value to compare against\n\nThe syntax is `(< OR > OR <= OR >=) <number>`\n\n* EX `> 100`  => greater than 100",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "source": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Test where the current activity was sourced from.\n\nA source can be any of:\n\n* `poll` => activity was retrieved from polling a queue (unmoderated, modqueue, etc...)\n* `poll:[pollSource]` => activity was retrieved from specific polling source IE `poll:unmoderated` activity comes from unmoderated queue\n  * valid sources: unmoderated modqueue newComm newSub\n* `dispatch` => activity is from Dispatch Action\n* `dispatch:[identifier]` => activity is from Dispatch Action with specific identifier\n* `user` => activity was from user input (web dashboard)"
+                },
+                "spam": {
+                    "type": "boolean"
+                },
+                "stickied": {
+                    "type": "boolean"
+                },
+                "submissionState": {
+                    "description": "A list of SubmissionState attributes to test the Submission this comment is in",
+                    "items": {
+                        "$ref": "#/definitions/SubmissionState"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "DatabaseDriverType": {
+            "enum": [
+                "better-sqlite3",
+                "mariadb",
+                "mysql",
+                "postgres",
+                "sqljs"
+            ],
+            "type": "string"
+        },
+        "DatabaseMigrationOptions": {
+            "properties": {
+                "continueOnAutomatedBackup": {
+                    "description": "When pending migrations are present at startup and this is set to `true` it directs CM to try to make a backup and, if successful, run migrations.",
+                    "type": "boolean"
+                },
+                "force": {
+                    "description": "When pending migrations are present at startup force migrations to run regardless of backup attempt or outcome",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "DatabaseStatisticsOperatorJsonConfig": {
+            "properties": {
+                "frequency": {
+                    "description": "Specify the frequency for collecting time-series statistics.\n\nValid values are: 'minute','hour','day','week','month','year' OR false to disable collection",
+                    "enum": [
+                        "day",
+                        false,
+                        "hour",
+                        "minute",
+                        "month",
+                        "week",
+                        "year"
+                    ]
+                },
+                "minFrequency": {
+                    "description": "Specify the allowed minimum frequency for collecting time-series statistics. If the frequency set for a subreddit is smaller this will override it.\n\nValid values are: 'minute','hour','day','week','month','year' OR false to specify no minimum",
+                    "enum": [
+                        "day",
+                        false,
+                        "hour",
+                        "minute",
+                        "month",
+                        "week",
+                        "year"
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "DiscordProviderConfig": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "enum": [
+                        "discord"
+                    ],
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "type",
+                "url"
+            ],
+            "type": "object"
+        },
+        "DurationObject": {
+            "additionalProperties": false,
+            "description": "A [Day.js duration object](https://day.js.org/docs/en/durations/creating)",
+            "examples": [
+                {
+                    "hours": 1,
+                    "minutes": 30
+                }
+            ],
+            "minProperties": 1,
+            "properties": {
+                "days": {
+                    "examples": [
+                        7
+                    ],
+                    "type": "number"
+                },
+                "hours": {
+                    "examples": [
+                        4
+                    ],
+                    "type": "number"
+                },
+                "minutes": {
+                    "examples": [
+                        50
+                    ],
+                    "type": "number"
+                },
+                "months": {
+                    "examples": [
+                        3
+                    ],
+                    "type": "number"
+                },
+                "seconds": {
+                    "examples": [
+                        15
+                    ],
+                    "type": "number"
+                },
+                "weeks": {
+                    "examples": [
+                        2
+                    ],
+                    "type": "number"
+                },
+                "years": {
+                    "examples": [
+                        0
+                    ],
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "FilterCriteriaDefaults": {
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FilterOptions<AuthorCriteria>"
+                        },
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    ]
+                },
+                "authorIsBehavior": {
+                    "enum": [
+                        "merge",
+                        "replace"
+                    ],
+                    "type": "string"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FilterOptions<TypedActivityState>"
+                        },
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        }
+                    ]
+                },
+                "itemIsBehavior": {
+                    "description": "Determine how itemIs defaults behave when itemIs is present on the check\n\n* merge => adds defaults to check's itemIs\n* replace => check itemIs will replace defaults (no defaults used)",
+                    "enum": [
+                        "merge",
+                        "replace"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "FilterOptions<AuthorCriteria>": {
+            "properties": {
+                "exclude": {
+                    "description": "Only runs if `include` is not present. Each Criteria is comprised of conditions that the filter (Author/Item) being checked must \"not\" pass. See excludeCondition for set behavior\n\nEX: `isMod: true, name: Automoderator` => Will pass if the Author IS NOT a mod and IS NOT named Automoderator",
+                    "items": {
+                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                    },
+                    "type": "array"
+                },
+                "excludeCondition": {
+                    "default": "OR",
+                    "description": "* OR => if ANY exclude condition \"does not\" pass then the exclude test passes\n* AND => if ALL exclude conditions \"do not\" pass then the exclude test passes\n\nDefaults to OR",
+                    "enum": [
+                        "AND",
+                        "OR"
+                    ],
+                    "type": "string"
+                },
+                "include": {
+                    "description": "Will \"pass\" if any set of Criteria passes",
+                    "items": {
+                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "FilterOptions<TypedActivityState>": {
+            "properties": {
+                "exclude": {
+                    "description": "Only runs if `include` is not present. Each Criteria is comprised of conditions that the filter (Author/Item) being checked must \"not\" pass. See excludeCondition for set behavior\n\nEX: `isMod: true, name: Automoderator` => Will pass if the Author IS NOT a mod and IS NOT named Automoderator",
+                    "items": {
+                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                    },
+                    "type": "array"
+                },
+                "excludeCondition": {
+                    "default": "OR",
+                    "description": "* OR => if ANY exclude condition \"does not\" pass then the exclude test passes\n* AND => if ALL exclude conditions \"do not\" pass then the exclude test passes\n\nDefaults to OR",
+                    "enum": [
+                        "AND",
+                        "OR"
+                    ],
+                    "type": "string"
+                },
+                "include": {
+                    "description": "Will \"pass\" if any set of Criteria passes",
+                    "items": {
+                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "InfluxConfig": {
+            "properties": {
+                "credentials": {
+                    "$ref": "#/definitions/InfluxCredentials"
+                },
+                "debug": {
+                    "type": "boolean"
+                },
+                "defaultTags": {
+                    "$ref": "#/definitions/Record<string,string>"
+                },
+                "useKeepAliveAgent": {
+                    "type": "boolean"
+                },
+                "writeOptions": {
+                    "$ref": "#/definitions/WriteOptions",
+                    "description": "Options used by{@linkWriteApi}."
+                }
+            },
+            "required": [
+                "credentials"
+            ],
+            "type": "object"
+        },
+        "InfluxCredentials": {
+            "properties": {
+                "bucket": {
+                    "type": "string"
+                },
+                "org": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "bucket",
+                "org",
+                "token",
+                "url"
+            ],
+            "type": "object"
+        },
+        "LoggingOptions": {
+            "properties": {
+                "console": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Pick<Transports.ConsoleTransportOptions,\"silent\"|\"eol\"|\"stderrLevels\"|\"consoleWarnLevels\">"
+                        },
+                        {
+                            "properties": {
+                                "level": {
+                                    "enum": [
+                                        "debug",
+                                        "error",
+                                        "info",
+                                        "verbose",
+                                        "warn"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ],
+                    "description": "Options for logging to console"
+                },
+                "file": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Omit<DailyRotateFileTransportOptions,\"stream\"|\"log\"|\"options\"|\"dirname\"|\"handleRejections\"|\"format\"|\"handleExceptions\"|\"logv\"|\"close\">"
+                        },
+                        {
+                            "properties": {
+                                "dirname": {
+                                    "description": "The absolute path to a directory where rotating log files should be stored.\n\n* If not present or `null` or `false` no log files will be created\n* If `true` logs will be stored at `[working directory]/logs`\n\n* ENV => `LOG_DIR`\n* ARG => `--logDir [dir]`",
+                                    "examples": [
+                                        "/var/log/contextmod"
+                                    ],
+                                    "type": [
+                                        "null",
+                                        "string",
+                                        "boolean"
+                                    ]
+                                },
+                                "level": {
+                                    "enum": [
+                                        "debug",
+                                        "error",
+                                        "info",
+                                        "verbose",
+                                        "warn"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ],
+                    "description": "Options for Rotating File logging"
+                },
+                "level": {
+                    "default": "verbose",
+                    "description": "The minimum log level to output. The log level set will output logs at its level **and all levels above it:**\n\n * `error`\n * `warn`\n * `info`\n * `verbose`\n * `debug`\n\n Note: `verbose` will display *a lot* of information on the status/result of run rules/checks/actions etc. which is very useful for testing configurations. Once your bot is stable changing the level to `info` will reduce log noise.\n\n * ENV => `LOG_LEVEL`\n * ARG => `--logLevel <level>`",
+                    "enum": [
+                        "debug",
+                        "error",
+                        "info",
+                        "verbose",
+                        "warn"
+                    ],
+                    "examples": [
+                        "verbose"
+                    ],
+                    "type": "string"
+                },
+                "path": {
+                    "deprecationMessage": "use `logging.file.dirname` instead",
+                    "description": "**DEPRECATED** - Use `file.dirname` instead\nThe absolute path to a directory where rotating log files should be stored.\n\n* If not present or `null` or `false` no log files will be created\n* If `true` logs will be stored at `[working directory]/logs`\n\n* ENV => `LOG_DIR`\n* ARG => `--logDir [dir]`",
+                    "examples": [
+                        "/var/log/contextmod"
+                    ],
+                    "type": [
+                        "null",
+                        "string",
+                        "boolean"
+                    ]
+                },
+                "stream": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Omit<DuplexTransportOptions,\"name\"|\"stream\"|\"log\"|\"handleRejections\"|\"format\"|\"handleExceptions\"|\"logv\"|\"close\">"
+                        },
+                        {
+                            "properties": {
+                                "level": {
+                                    "enum": [
+                                        "debug",
+                                        "error",
+                                        "info",
+                                        "verbose",
+                                        "warn"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    ],
+                    "description": "Options for logging to api/web"
+                }
+            },
+            "type": "object"
+        },
+        "ModLogCriteria": {
+            "properties": {
+                "action": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "activityType": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "comment",
+                                    false,
+                                    "submission"
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "comment",
+                                false,
+                                "submission"
+                            ]
+                        }
+                    ]
+                },
+                "count": {
+                    "default": ">= 1",
+                    "description": "Number of occurrences of this type. Ignored if `search` is `current`\n\nA string containing a comparison operator and/or a value to compare number of occurrences against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign] [in timeRange] [ascending|descending]`\n\nIf `timeRange` is given then only notes/mod actions that occur between timeRange and NOW will be returned. `timeRange` is ignored if search is `current`",
+                    "examples": [
+                        ">= 1"
+                    ],
+                    "pattern": "^\\s*(?<opStr>>|>=|<|<=)\\s*(?<value>\\d+)\\s*(?<percent>%?)\\s*(?<duration>in\\s+\\d+\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?))?\\s*(?<extra>asc.*|desc.*)*$",
+                    "type": "string"
+                },
+                "description": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "details": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "referencesCurrentActivity": {
+                    "type": "boolean"
+                },
+                "search": {
+                    "default": "current",
+                    "description": "How to test the Toolbox Notes or Mod Actions for this Author:\n\n### current\n\nOnly the most recent note is checked for criteria\n\n### total\n\n`count` comparison of mod actions/notes must be found within all history\n\n* EX `count: > 3`   => Must have more than 3 notes of `type`, total\n* EX `count: <= 25%` => Must have 25% or less of notes of `type`, total\n* EX: `count: > 3 in 1 week` => Must have more than 3 notes within the last week\n\n### consecutive\n\nThe `count` **number** of mod actions/notes must be found in a row.\n\nYou may also specify the time-based order in which to search the notes by specifying `ascending (asc)` or `descending (desc)` in the `count` value. Default is `descending`\n\n* EX `count: >= 3` => Must have 3 or more notes of `type` consecutively, in descending order\n* EX `count: < 2`  => Must have less than 2 notes of `type` consecutively, in descending order\n* EX `count: > 4 asc` => Must have greater than 4 notes of `type` consecutively, in ascending order",
+                    "enum": [
+                        "consecutive",
+                        "current",
+                        "total"
+                    ],
+                    "examples": [
+                        "current"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "APPROVAL",
+                                    "INVITE",
+                                    "NOTE",
+                                    "REMOVAL",
+                                    "SPAM"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "APPROVAL",
+                                "INVITE",
+                                "NOTE",
+                                "REMOVAL",
+                                "SPAM"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "ModNoteCriteria": {
+            "properties": {
+                "activityType": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "comment",
+                                    false,
+                                    "submission"
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "comment",
+                                false,
+                                "submission"
+                            ]
+                        }
+                    ]
+                },
+                "count": {
+                    "default": ">= 1",
+                    "description": "Number of occurrences of this type. Ignored if `search` is `current`\n\nA string containing a comparison operator and/or a value to compare number of occurrences against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign] [in timeRange] [ascending|descending]`\n\nIf `timeRange` is given then only notes/mod actions that occur between timeRange and NOW will be returned. `timeRange` is ignored if search is `current`",
+                    "examples": [
+                        ">= 1"
+                    ],
+                    "pattern": "^\\s*(?<opStr>>|>=|<|<=)\\s*(?<value>\\d+)\\s*(?<percent>%?)\\s*(?<duration>in\\s+\\d+\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?))?\\s*(?<extra>asc.*|desc.*)*$",
+                    "type": "string"
+                },
+                "note": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "noteType": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "ABUSE_WARNING",
+                                    "BAN",
+                                    "BOT_BAN",
+                                    "HELPFUL_USER",
+                                    "PERMA_BAN",
+                                    "SOLID_CONTRIBUTOR",
+                                    "SPAM_WARNING",
+                                    "SPAM_WATCH"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "ABUSE_WARNING",
+                                "BAN",
+                                "BOT_BAN",
+                                "HELPFUL_USER",
+                                "PERMA_BAN",
+                                "SOLID_CONTRIBUTOR",
+                                "SPAM_WARNING",
+                                "SPAM_WATCH"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "referencesCurrentActivity": {
+                    "type": "boolean"
+                },
+                "search": {
+                    "default": "current",
+                    "description": "How to test the Toolbox Notes or Mod Actions for this Author:\n\n### current\n\nOnly the most recent note is checked for criteria\n\n### total\n\n`count` comparison of mod actions/notes must be found within all history\n\n* EX `count: > 3`   => Must have more than 3 notes of `type`, total\n* EX `count: <= 25%` => Must have 25% or less of notes of `type`, total\n* EX: `count: > 3 in 1 week` => Must have more than 3 notes within the last week\n\n### consecutive\n\nThe `count` **number** of mod actions/notes must be found in a row.\n\nYou may also specify the time-based order in which to search the notes by specifying `ascending (asc)` or `descending (desc)` in the `count` value. Default is `descending`\n\n* EX `count: >= 3` => Must have 3 or more notes of `type` consecutively, in descending order\n* EX `count: < 2`  => Must have less than 2 notes of `type` consecutively, in descending order\n* EX `count: > 4 asc` => Must have greater than 4 notes of `type` consecutively, in ascending order",
+                    "enum": [
+                        "consecutive",
+                        "current",
+                        "total"
+                    ],
+                    "examples": [
+                        "current"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "APPROVAL",
+                                    "INVITE",
+                                    "NOTE",
+                                    "REMOVAL",
+                                    "SPAM"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "APPROVAL",
+                                "INVITE",
+                                "NOTE",
+                                "REMOVAL",
+                                "SPAM"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "ModeratorNameCriteria": {
+            "properties": {
+                "behavior": {
+                    "enum": [
+                        "exclude",
+                        "include"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "type": "object"
+        },
+        "NamedCriteria<AuthorCriteria>": {
+            "properties": {
+                "criteria": {
+                    "$ref": "#/definitions/AuthorCriteria"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "criteria"
+            ],
+            "type": "object"
+        },
+        "NamedCriteria<TypedActivityState>": {
+            "properties": {
+                "criteria": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SubmissionState"
+                        },
+                        {
+                            "$ref": "#/definitions/CommentState"
+                        }
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "criteria"
+            ],
+            "type": "object"
+        },
+        "NotificationConfig": {
+            "properties": {
+                "events": {
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/NotificationEventConfig"
+                            },
+                            {
+                                "items": {
+                                    "enum": [
+                                        "configUpdated",
+                                        "eventActioned",
+                                        "pollingError",
+                                        "runStateChanged"
+                                    ],
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "providers": {
+                    "description": "A list of notification providers (Discord, etc..) to configure. Each object in the list is one provider. Multiple of the same provider can be provided but must have different names",
+                    "items": {
+                        "$ref": "#/definitions/DiscordProviderConfig"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "events",
+                "providers"
+            ],
+            "type": "object"
+        },
+        "NotificationEventConfig": {
+            "properties": {
+                "providers": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "types": {
+                    "items": {
+                        "enum": [
+                            "configUpdated",
+                            "eventActioned",
+                            "pollingError",
+                            "runStateChanged"
+                        ],
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "providers",
+                "types"
+            ],
+            "type": "object"
+        },
+        "Omit<DailyRotateFileTransportOptions,\"stream\"|\"log\"|\"options\"|\"dirname\"|\"handleRejections\"|\"format\"|\"handleExceptions\"|\"logv\"|\"close\">": {
+            "properties": {
+                "auditFile": {
+                    "description": "A string representing the name of the name of the audit file. (default: './hash-audit.json')",
+                    "type": "string"
+                },
+                "createSymlink": {
+                    "description": "Create a tailable symlink to the current active log file. (default: false)",
+                    "type": "boolean"
+                },
+                "datePattern": {
+                    "description": "A string representing the moment.js date format to be used for rotating. The meta characters used in this string will dictate the frequency of the file rotation. For example, if your datePattern is simply 'HH' you will end up with 24 log files that are picked up and appended to every day. (default 'YYYY-MM-DD')",
+                    "type": "string"
+                },
+                "eol": {
+                    "type": "string"
+                },
+                "extension": {
+                    "description": "A string representing an extension to be added to the filename, if not included in the filename property. (default: '')",
+                    "type": "string"
+                },
+                "filename": {
+                    "description": "Filename to be used to log to. This filename can include the %DATE% placeholder which will include the formatted datePattern at that point in the filename. (default: 'winston.log.%DATE%)",
+                    "type": "string"
+                },
+                "frequency": {
+                    "description": "A string representing the frequency of rotation. (default: 'custom')",
+                    "type": "string"
+                },
+                "json": {
+                    "type": "boolean"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "maxFiles": {
+                    "description": "Maximum number of logs to keep. If not set, no logs will be removed. This can be a number of files or number of days. If using days, add 'd' as the suffix. (default: null)",
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                },
+                "maxSize": {
+                    "description": "Maximum size of the file after which it will rotate. This can be a number of bytes, or units of kb, mb, and gb. If using the units, add 'k', 'm', or 'g' as the suffix. The units need to directly follow the number. (default: null)",
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                },
+                "silent": {
+                    "type": "boolean"
+                },
+                "symlinkName": {
+                    "description": "The name of the tailable symlink. (default: 'current.log')",
+                    "type": "string"
+                },
+                "utc": {
+                    "description": "A boolean whether or not to generate file name from \"datePattern\" in UTC format. (default: false)",
+                    "type": "boolean"
+                },
+                "watchLog": {
+                    "description": "Watch the current file being written to and recreate it in case of accidental deletion. (default: FALSE)",
+                    "type": "boolean"
+                },
+                "zippedArchive": {
+                    "description": "A boolean to define whether or not to gzip archived log files. (default 'false')",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "Omit<DuplexTransportOptions,\"name\"|\"stream\"|\"log\"|\"handleRejections\"|\"format\"|\"handleExceptions\"|\"logv\"|\"close\">": {
+            "properties": {
+                "dump": {
+                    "type": "boolean"
+                },
+                "eol": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "silent": {
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "OperatorCacheConfig": {
+            "properties": {
+                "authorTTL": {
+                    "default": 60,
+                    "description": "Amount of time, in seconds, author activity history (Comments/Submission) should be cached\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache\n\n* ENV => `AUTHOR_TTL`\n* ARG => `--authorTTL <sec>`",
+                    "examples": [
+                        60
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "commentTTL": {
+                    "default": 60,
+                    "description": "Amount of time, in seconds, a comment should be cached\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache",
+                    "examples": [
+                        60
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "filterCriteriaTTL": {
+                    "default": 60,
+                    "description": "Amount of time, in seconds, to cache filter criteria results (`authorIs` and `itemIs` results)\n\nThis is especially useful if when polling high-volume comments and your checks rely on author/item filters\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache",
+                    "examples": [
+                        60
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "modNotesTTL": {
+                    "default": 60,
+                    "description": "Amount of time, in seconds, Mod Notes should be cached\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache",
+                    "examples": [
+                        60
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "provider": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/CacheOptions"
+                        },
+                        {
+                            "enum": [
+                                "memory",
+                                "none",
+                                "redis"
+                            ],
+                            "type": "string"
+                        }
+                    ],
+                    "description": "The cache provider and, optionally, a custom configuration for that provider\n\nIf not present or `null` provider will be `memory`.\n\nTo specify another `provider` but use its default configuration set this property to a string of one of the available providers: `memory`, `redis`, or `none`"
+                },
+                "selfTTL": {
+                    "default": 50,
+                    "description": "Amount of time, in seconds, an Activity that the bot has acted on or created will be ignored if found during polling\n\nThis is useful to prevent the bot from checking Activities it *just* worked on or a product of the checks. Examples:\n\n* Ignore comments created through an Action\n* Ignore Activity polled from modqueue that the bot just reported\n\nThis value should be at least as long as the longest polling interval for modqueue/newComm\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache",
+                    "examples": [
+                        50
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "submissionTTL": {
+                    "default": 60,
+                    "description": "Amount of time, in seconds, a submission should be cached\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache",
+                    "examples": [
+                        60
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "subredditTTL": {
+                    "default": 600,
+                    "description": "Amount of time, in seconds, a subreddit (attributes) should be cached\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache",
+                    "examples": [
+                        600
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "userNotesTTL": {
+                    "default": 300,
+                    "description": "Amount of time, in seconds, [Toolbox User Notes](https://www.reddit.com/r/toolbox/wiki/docs/usernotes) should be cached\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache",
+                    "examples": [
+                        300
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "wikiTTL": {
+                    "default": 300,
+                    "description": "Amount of time, in seconds, wiki content pages should be cached\n\n* If `0` or `true` will cache indefinitely (not recommended)\n* If `false` will not cache",
+                    "examples": [
+                        300
+                    ],
+                    "type": [
+                        "number",
+                        "boolean"
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "Pick<Transports.ConsoleTransportOptions,\"silent\"|\"eol\"|\"stderrLevels\"|\"consoleWarnLevels\">": {
+            "properties": {
+                "consoleWarnLevels": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "eol": {
+                    "type": "string"
+                },
+                "silent": {
+                    "type": "boolean"
+                },
+                "stderrLevels": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "PollingDefaults": {
+            "properties": {
+                "delayUntil": {
+                    "description": "Delay processing Activity until it is `N` seconds old\n\nUseful if there are other bots that may process an Activity and you want this bot to run first/last/etc.\n\nIf the Activity is already `N` seconds old when it is initially retrieved no refresh of the Activity occurs (no API request is made) and it is immediately processed.",
+                    "type": "number"
+                },
+                "interval": {
+                    "default": 30,
+                    "description": "Amount of time, in seconds, to wait between requests",
+                    "examples": [
+                        30
+                    ],
+                    "type": "number"
+                },
+                "limit": {
+                    "default": 50,
+                    "description": "The maximum number of Activities to get on every request",
+                    "examples": [
+                        50
+                    ],
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "PostBehavior": {
+            "properties": {
+                "postFail": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/PostBehaviorOptionConfig"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "next",
+                    "description": "Do this behavior if a Check is NOT triggered"
+                },
+                "postTrigger": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/PostBehaviorOptionConfig"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": "nextRun",
+                    "description": "Do this behavior if a Check is triggered"
+                }
+            },
+            "type": "object"
+        },
+        "PostBehaviorOptionConfig": {
+            "properties": {
+                "behavior": {
+                    "description": "The possible behaviors that can occur after a check has run\n\n* next => continue to next Check/Run\n* stop => stop CM lifecycle for this activity (immediately end)\n* nextRun => skip any remaining Checks in this Run and start the next Run\n* goto:[path] => specify a run[.check] to jump to",
+                    "type": "string"
+                },
+                "recordTo": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "description": "Possible outputs to store event details to",
+                                "enum": [
+                                    "database",
+                                    "influx"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "database",
+                                false,
+                                "influx",
+                                true
+                            ]
+                        }
+                    ],
+                    "description": "Possible options for output:\n\n* true -> store to all\n* false -> store to none\n* string -> store to this one output\n* list -> store to these specified outputs"
+                }
+            },
+            "type": "object"
+        },
+        "Record<string,string>": {
+            "type": "object"
+        },
+        "RedditCredentials": {
+            "description": "Credentials required for the bot to interact with Reddit's API\n\nThese credentials will provided to both the API and Web interface unless otherwise specified with the `web.credentials` property\n\nRefer to the [required credentials table](https://github.com/FoxxMD/context-mod/blob/master/docs/operatorConfiguration.md#minimum-required-configuration) to see what is necessary to run the bot.",
+            "examples": [
+                {
+                    "accessToken": "p75_1c467b2",
+                    "clientId": "f4b4df1_9oiu",
+                    "clientSecret": "34v5q1c564_yt7",
+                    "redirectUri": "http://localhost:8085/callback",
+                    "refreshToken": "34_f1w1v4"
+                }
+            ],
+            "properties": {
+                "accessToken": {
+                    "description": "Access token retrieved from authenticating an account with your Reddit Application\n\n* ENV => `ACCESS_TOKEN`\n* ARG => `--accessToken <token>`",
+                    "examples": [
+                        "p75_1c467b2"
+                    ],
+                    "type": "string"
+                },
+                "clientId": {
+                    "description": "Client ID for your Reddit application\n\n* ENV => `CLIENT_ID`\n* ARG => `--clientId <id>`",
+                    "examples": [
+                        "f4b4df1c7b2"
+                    ],
+                    "type": "string"
+                },
+                "clientSecret": {
+                    "description": "Client Secret for your Reddit application\n\n* ENV => `CLIENT_SECRET`\n* ARG => `--clientSecret <id>`",
+                    "examples": [
+                        "34v5q1c56ub"
+                    ],
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "description": "Refresh token retrieved from authenticating an account with your Reddit Application\n\n* ENV => `REFRESH_TOKEN`\n* ARG => `--refreshToken <token>`",
+                    "examples": [
+                        "34_f1w1v4"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "SnoowrapOptions": {
+            "properties": {
+                "debug": {
+                    "description": "Manually set the debug status for snoowrap\n\nWhen snoowrap has `debug: true` it will log the http status response of reddit api requests to at the `debug` level\n\n* Set to `true` to always output\n* Set to `false` to never output\n\nIf not present or `null` will be set based on `logLevel`\n\n* ENV => `SNOO_DEBUG`\n* ARG => `--snooDebug`",
+                    "type": "boolean"
+                },
+                "maxRetryAttempts": {
+                    "default": 2,
+                    "description": "Set the maximum number of times snoowrap will retry a request if it encounters one of the codes specified in either retryErrorCodes or timeoutCodes\n\nEach retry attempt is delayed by an exponential falloff timer",
+                    "examples": [
+                        2
+                    ],
+                    "type": "number"
+                },
+                "proxy": {
+                    "description": "Proxy all requests to Reddit's API through this endpoint\n\n* ENV => `PROXY`\n* ARG => `--proxy <proxyEndpoint>`",
+                    "examples": [
+                        "http://localhost:4443"
+                    ],
+                    "type": "string"
+                },
+                "retryErrorCodes": {
+                    "default": [
+                        502,
+                        503,
+                        504,
+                        522
+                    ],
+                    "description": "Specify the HTTP Status codes that should be valid for retrying a request\n\nDefaults: 502, 503, 504, 522",
+                    "items": {
+                        "type": "number"
+                    },
+                    "type": "array"
+                },
+                "timeoutCodes": {
+                    "default": "['ESOCKETTIMEDOUT', 'ETIMEDOUT', 'ECONNRESET']",
+                    "description": "Specify the error codes that should be valid for retrying a request.\n\nThese are used to make snoowrap retry if a request times out or reddit's api response times out -- which happens occasionally for no reason.\n\nYou most likely do not need to change these. However, if you want snoowrap to always fail on a network issue set this to an empty array\n\nDefaults: 'ESOCKETTIMEDOUT', 'ETIMEDOUT', 'ECONNRESET'",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "SubmissionState": {
+            "description": "Different attributes a `Submission` can be in. Only include a property if you want to check it.",
+            "examples": [
+                {
+                    "over_18": true,
+                    "removed": false
+                }
+            ],
+            "properties": {
+                "age": {
+                    "description": "A duration and how to compare it against a value\n\nThe syntax is `(< OR > OR <= OR >=) <number> <unit>` EX `> 100 days`, `<= 2 months`\n\n* EX `> 100 days` => Passes if the date being compared is before 100 days ago\n* EX `<= 2 months` => Passes if the date being compared is after or equal to 2 months\n\nUnit must be one of [DayJS Duration units](https://day.js.org/docs/en/durations/creating)\n\n[See] https://regexr.com/609n8 for example",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(days|weeks|months|years|hours|minutes|seconds|milliseconds)\\s*$",
+                    "type": "string"
+                },
+                "approved": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/ModeratorNameCriteria"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* true/false => test whether Activity is approved or not\n* string or list of strings => test which moderator approved this Activity"
+                },
+                "authorFlairBackgroundColor": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY color\n* If `false` then passes if NO color\n* If string or list of strings then color is matched, case-insensitive, without #. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairCssClass": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY class\n* If `false` then passes if NO class\n* If string or list of strings then class is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairTemplateId": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY flair\n* If `false` then passes if NO flair\n* If string or list of strings then template id is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairText": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY flair\n* If `false` then passes if NO flair\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "createdOn": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "A relative datetime description to match the date the Activity was created\n\nMay be either:\n\n* day of the week (monday, tuesday, etc...)\n* cron expression IE `* * 15 *`\n\nSee https://crontab.guru/ for generating expressions\n\nhttps://regexr.com/6u3cc"
+                },
+                "deleted": {
+                    "type": "boolean"
+                },
+                "dispatched": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "Test whether the activity is present in dispatched/delayed activities\n\nNOTE: This is DOES NOT mean that THIS activity is from dispatch -- just that it exists there. To test whether THIS activity is from dispatch use `source`\n\n* `true` => activity exists in delayed activities\n* `false` => activity DOES NOT exist in delayed activities\n* `string` => activity exists in delayed activities with given identifier\n* `string[]` => activity exists in delayed activities with any of the given identifiers"
+                },
+                "distinguished": {
+                    "type": "boolean"
+                },
+                "filtered": {
+                    "type": "boolean"
+                },
+                "flairTemplate": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if there is ANY flair template id\n* If `false` then passes if there is NO flair template id"
+                },
+                "isRedditMediaDomain": {
+                    "description": "Is the submission a reddit-hosted image or video?",
+                    "type": "boolean"
+                },
+                "is_self": {
+                    "type": "boolean"
+                },
+                "link_flair_background_color": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY color\n* If `false` then passes if NO color\n* If string or list of strings then color is matched, case-insensitive, without #. String may also be a regular expression enclosed in forward slashes."
+                },
+                "link_flair_css_class": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if flair has ANY css\n* If `false` then passes if flair has NO css\n* If string or list of strings then class is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "link_flair_text": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if flair has ANY text\n* If `false` then passes if flair has NO text\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "locked": {
+                    "type": "boolean"
+                },
+                "over_18": {
+                    "description": "NSFW",
+                    "type": "boolean"
+                },
+                "pinned": {
+                    "type": "boolean"
+                },
+                "removed": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/ModeratorNameCriteria"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* true/false => test whether Activity is removed or not\n* string or list of strings => test which moderator removed this Activity"
+                },
+                "reports": {
+                    "description": "A string containing a comparison operator, a value to compare against, an (optional) report type filter, an (optional) qualifier for report reason, and an (optional) time constraint\n\nThe syntax is `(< OR > OR <= OR >=) number[%] [type] [reasonQualifier] [timeValue] [timeUnit]`\n\nIf only comparison and number is given then defaults to TOTAL reports on an Activity.\n\n* EX `> 2`  => greater than 2 total reports\n\nType (optional) determines which type of reports to look at:\n\n* `mod` -- mod reports\n  * EX `> 3 mod` => greater than 3 mod reports\n* `user` -- user reports\n  * EX `> 3 user` => greater than 3 user reports\n\nReport reason qualifiers can be:\n\n* enclosed double or single quotes -- report reason contains\n  * EX `> 1 \"misinformation\" => greater than 1 report with reason containing \"misinformation\"\n* enclosed in backslashes -- match regex\n  * EX `> 1 \\harassment towards .*\\` => greater than 1 report with reason matching regex \\harassment towards .*\\\n\nType and reason qualifiers can be used together:\n\nEX `> 2 user \"misinformation\" => greater than 2 user reports with reasons containing \"misinformation\"\n\nThe time constraint filter reports created between NOW and [timeConstraint] in the past:\n\n* `> 3 in 30 minutes` => more than 3 reports created between NOW and 30 minutes ago\n* `> 2 user \"misinformation\" in 2 hours` => more than 2 user reports containing \"misinformation\" created between NOW and 2 hours ago",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)(\\s*%)?(\\s+(?:mods?|users?))?(\\s+(?:[\"'].*[\"']|\\/.*\\/))?.*(\\d+)?\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?)?\\s*$",
+                    "type": "string"
+                },
+                "score": {
+                    "description": "A string containing a comparison operator and a value to compare against\n\nThe syntax is `(< OR > OR <= OR >=) <number>`\n\n* EX `> 100`  => greater than 100",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "source": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Test where the current activity was sourced from.\n\nA source can be any of:\n\n* `poll` => activity was retrieved from polling a queue (unmoderated, modqueue, etc...)\n* `poll:[pollSource]` => activity was retrieved from specific polling source IE `poll:unmoderated` activity comes from unmoderated queue\n  * valid sources: unmoderated modqueue newComm newSub\n* `dispatch` => activity is from Dispatch Action\n* `dispatch:[identifier]` => activity is from Dispatch Action with specific identifier\n* `user` => activity was from user input (web dashboard)"
+                },
+                "spam": {
+                    "type": "boolean"
+                },
+                "spoiler": {
+                    "type": "boolean"
+                },
+                "stickied": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "description": "A valid regular expression to match against the title of the submission",
+                    "type": "string"
+                },
+                "upvoteRatio": {
+                    "description": "Compare the upvote ratio for this Submission, expressed as a whole number\n\nCan be either a comparison string or a number. If a number then CM assumes upvote ratio must be greater than or equal to this.\n\nExample:\n\n* `< 90` => less than 90% upvoted\n* 45 => greater than or equal to 45% upvoted",
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "SubredditOverrides": {
+            "properties": {
+                "databaseConfig": {
+                    "properties": {
+                        "retention": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/definitions/DurationObject"
+                                },
+                                {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                }
+                            ],
+                            "description": "Number of Events, or time range of events were processed during, that should continue to be stored in the database.\n\nAny Events falling outside this criteria will be deleted\n\nLeave unspecified to disable deleting anything\n\nThis will override any retention value set in the subreddit's config"
+                        }
+                    },
+                    "type": "object"
+                },
+                "databaseStatisticsDefaults": {
+                    "$ref": "#/definitions/DatabaseStatisticsOperatorJsonConfig",
+                    "description": "Set defaults for the frequency time series stats are collected. Will override bot-level defaults"
+                },
+                "flowControlDefaults": {
+                    "properties": {
+                        "maxGotoDepth": {
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "wikiConfig": {
+                    "default": "botconfig/contextbot",
+                    "description": "The relative URL to the ContextMod wiki page EX `https://reddit.com/r/subreddit/wiki/<path>`\n\nThis will override the default relative URL as well as any URL set at the bot-level",
+                    "examples": [
+                        "botconfig/contextbot"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "type": "object"
+        },
+        "ThirdPartyCredentialsJsonConfig": {
+            "additionalProperties": {},
+            "properties": {
+                "mhs": {
+                    "properties": {
+                        "apiKey": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "apiKey"
+                    ],
+                    "type": "object"
+                },
+                "youtube": {
+                    "properties": {
+                        "apiKey": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "apiKey"
+                    ],
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        },
+        "UserNoteCriteria": {
+            "properties": {
+                "count": {
+                    "default": ">= 1",
+                    "description": "Number of occurrences of this type. Ignored if `search` is `current`\n\nA string containing a comparison operator and/or a value to compare number of occurrences against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign] [in timeRange] [ascending|descending]`\n\nIf `timeRange` is given then only notes/mod actions that occur between timeRange and NOW will be returned. `timeRange` is ignored if search is `current`",
+                    "examples": [
+                        ">= 1"
+                    ],
+                    "pattern": "^\\s*(?<opStr>>|>=|<|<=)\\s*(?<value>\\d+)\\s*(?<percent>%?)\\s*(?<duration>in\\s+\\d+\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?))?\\s*(?<extra>asc.*|desc.*)*$",
+                    "type": "string"
+                },
+                "note": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "The content of the Note to search For.\n\n* Can be a single string or list of strings to search for. Each string will be searched for case-insensitive, as a subset of note content.\n* Can also be Regular Expression if wrapped in forward slashes IE '\\/test.*\\/i'"
+                },
+                "referencesCurrentActivity": {
+                    "type": "boolean"
+                },
+                "search": {
+                    "default": "current",
+                    "description": "How to test the Toolbox Notes or Mod Actions for this Author:\n\n### current\n\nOnly the most recent note is checked for criteria\n\n### total\n\n`count` comparison of mod actions/notes must be found within all history\n\n* EX `count: > 3`   => Must have more than 3 notes of `type`, total\n* EX `count: <= 25%` => Must have 25% or less of notes of `type`, total\n* EX: `count: > 3 in 1 week` => Must have more than 3 notes within the last week\n\n### consecutive\n\nThe `count` **number** of mod actions/notes must be found in a row.\n\nYou may also specify the time-based order in which to search the notes by specifying `ascending (asc)` or `descending (desc)` in the `count` value. Default is `descending`\n\n* EX `count: >= 3` => Must have 3 or more notes of `type` consecutively, in descending order\n* EX `count: < 2`  => Must have less than 2 notes of `type` consecutively, in descending order\n* EX `count: > 4 asc` => Must have greater than 4 notes of `type` consecutively, in ascending order",
+                    "enum": [
+                        "consecutive",
+                        "current",
+                        "total"
+                    ],
+                    "examples": [
+                        "current"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "description": "User Note type key to search for",
+                    "examples": [
+                        "spamwarn"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "type": "object"
+        },
+        "WebCredentials": {
+            "description": "Separate credentials for the web interface can be provided when also running the api.\n\nAll properties not specified will default to values given in ENV/ARG credential properties\n\nRefer to the [required credentials table](https://github.com/FoxxMD/context-mod/blob/master/docs/operatorConfiguration.md#minimum-required-configuration) to see what is necessary for the web interface.",
+            "examples": [
+                {
+                    "clientId": "f4b4df1_9oiu",
+                    "clientSecret": "34v5q1c564_yt7",
+                    "redirectUri": "http://localhost:8085/callback"
+                }
+            ],
+            "properties": {
+                "clientId": {
+                    "description": "Client ID for your Reddit application",
+                    "examples": [
+                        "f4b4df1_9oiu"
+                    ],
+                    "type": "string"
+                },
+                "clientSecret": {
+                    "description": "Client Secret for your Reddit application",
+                    "examples": [
+                        "34v5q1c564_yt7"
+                    ],
+                    "type": "string"
+                },
+                "redirectUri": {
+                    "description": "Redirect URI for your Reddit application\n\nUsed for:\n\n* accessing the web interface for monitoring bots\n* authenticating an account to use for a bot instance\n\n* ENV => `REDIRECT_URI`\n* ARG => `--redirectUri <uri>`",
+                    "examples": [
+                        "http://localhost:8085/callback"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "WriteOptions": {
+            "description": "Options used by{@linkWriteApi}.",
+            "properties": {
+                "batchSize": {
+                    "description": "max number of records/lines to send in a batch",
+                    "type": "number"
+                },
+                "consistency": {
+                    "description": "InfluxDB Enterprise write consistency as explained in https://docs.influxdata.com/enterprise_influxdb/v1.9/concepts/clustering/#write-consistency",
+                    "enum": [
+                        "all",
+                        "any",
+                        "one",
+                        "quorum"
+                    ],
+                    "type": "string"
+                },
+                "defaultTags": {
+                    "$ref": "#/definitions/Record<string,string>",
+                    "description": "default tags, unescaped"
+                },
+                "exponentialBase": {
+                    "description": "base for the exponential retry delay",
+                    "type": "number"
+                },
+                "flushInterval": {
+                    "description": "delay between data flushes in milliseconds, at most `batch size` records are sent during flush",
+                    "type": "number"
+                },
+                "gzipThreshold": {
+                    "description": "When specified, write bodies larger than the threshold are gzipped",
+                    "type": "number"
+                },
+                "headers": {
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "HTTP headers that will be sent with every write request",
+                    "type": "object"
+                },
+                "maxBatchBytes": {
+                    "description": "max size of a batch in bytes",
+                    "type": "number"
+                },
+                "maxBufferLines": {
+                    "description": "the maximum size of retry-buffer (in lines)",
+                    "type": "number"
+                },
+                "maxRetries": {
+                    "description": "max count of retries after the first write fails",
+                    "type": "number"
+                },
+                "maxRetryDelay": {
+                    "description": "maximum delay when retrying write (milliseconds)",
+                    "type": "number"
+                },
+                "maxRetryTime": {
+                    "description": "max time (millis) that can be spent with retries",
+                    "type": "number"
+                },
+                "minRetryDelay": {
+                    "description": "minimum delay when retrying write (milliseconds)",
+                    "type": "number"
+                },
+                "randomRetry": {
+                    "description": "randomRetry indicates whether the next retry delay is deterministic (false) or random (true).\nThe deterministic delay starts with `minRetryDelay * exponentialBase` and it is multiplied\nby `exponentialBase` until it exceeds `maxRetryDelay`.\nWhen random is `true`, the next delay is computed as a random number between next retry attempt (upper)\nand the lower number in the deterministic sequence. `random(retryJitter)` is added to every returned value.",
+                    "type": "boolean"
+                },
+                "retryJitter": {
+                    "description": "add `random(retryJitter)` milliseconds delay when retrying HTTP calls",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "batchSize",
+                "exponentialBase",
+                "flushInterval",
+                "maxBatchBytes",
+                "maxBufferLines",
+                "maxRetries",
+                "maxRetryDelay",
+                "maxRetryTime",
+                "minRetryDelay",
+                "randomRetry",
+                "retryJitter"
+            ],
+            "type": "object"
+        }
+    },
+    "description": "Configuration for application-level settings IE for running the bot instance\n\n* To load a JSON configuration **from the command line** use the `-c` cli argument EX: `node src/index.js -c /path/to/JSON/config.json`\n* To load a JSON configuration **using an environmental variable** use `OPERATOR_CONFIG` EX: `OPERATOR_CONFIG=/path/to/JSON/config.json`",
+    "properties": {
+        "api": {
+            "description": "Configuration for the **Server** application. See [Architecture Documentation](https://github.com/FoxxMD/context-mod/blob/master/docs/serverClientArchitecture.md) for more info",
+            "properties": {
+                "friendly": {
+                    "description": "A friendly name for this server. This will override `friendly` in `BotConnection` if specified.\n\nIf none is set one is randomly generated.",
+                    "type": "string"
+                },
+                "port": {
+                    "default": 8095,
+                    "description": "The port the server listens on for API requests",
+                    "examples": [
+                        8095
+                    ],
+                    "type": "number"
+                },
+                "secret": {
+                    "description": "The **shared secret** used to verify API requests come from an authenticated client.\n\nUse this same value for the `secret` value in a `BotConnection` object to connect to this Server",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "bots": {
+            "items": {
+                "$ref": "#/definitions/BotInstanceJsonConfig"
+            },
+            "type": "array"
+        },
+        "caching": {
+            "$ref": "#/definitions/OperatorCacheConfig",
+            "description": "Settings to configure the default caching behavior globally\n\nThese settings will be used by each bot, and subreddit, that does not specify their own"
+        },
+        "credentials": {
+            "$ref": "#/definitions/ThirdPartyCredentialsJsonConfig"
+        },
+        "databaseConfig": {
+            "description": "Database backend to use for persistent APPLICATION data\n\nDefaults to 'sqljs' which stores data in a file",
+            "properties": {
+                "connection": {
+                    "anyOf": [
+                        {
+                            "additionalProperties": {},
+                            "properties": {
+                                "logging": {
+                                    "anyOf": [
+                                        {
+                                            "items": {
+                                                "enum": [
+                                                    "error",
+                                                    "info",
+                                                    "log",
+                                                    "migration",
+                                                    "query",
+                                                    "schema",
+                                                    "warn"
+                                                ],
+                                                "type": "string"
+                                            },
+                                            "type": "array"
+                                        },
+                                        {
+                                            "enum": [
+                                                "all",
+                                                false,
+                                                true
+                                            ]
+                                        }
+                                    ],
+                                    "description": "Set the type of logging typeorm should output\n\nDefaults to errors, warnings, and schema (migration progress)"
+                                },
+                                "type": {
+                                    "$ref": "#/definitions/DatabaseDriverType"
+                                }
+                            },
+                            "required": [
+                                "type"
+                            ],
+                            "type": "object"
+                        },
+                        {
+                            "enum": [
+                                "better-sqlite3",
+                                "mariadb",
+                                "mysql",
+                                "postgres",
+                                "sqljs"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "migrations": {
+                    "$ref": "#/definitions/DatabaseMigrationOptions"
+                },
+                "retention": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/DurationObject"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "number"
+                            ]
+                        }
+                    ],
+                    "description": "Number of Events, or time range of events were processed during, that should continue to be stored in the database PER SUBREDDIT\n\nAny Events falling outside this criteria will be deleted\n\nLeave unspecified to disable deleting anything"
+                }
+            },
+            "type": "object"
+        },
+        "databaseStatisticsDefaults": {
+            "$ref": "#/definitions/DatabaseStatisticsOperatorJsonConfig",
+            "description": "Set defaults for the frequency time series stats are collected"
+        },
+        "dev": {
+            "properties": {
+                "monitorMemory": {
+                    "description": "Invoke `process.memoryUsage()` on an interval and send metrics to Influx\n\nOnly works if Influx config is provided",
+                    "type": "boolean"
+                },
+                "monitorMemoryInterval": {
+                    "default": 15,
+                    "description": "Interval, in seconds, to invoke `process.memoryUsage()` at\n\nDefaults to 15 seconds",
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "influxConfig": {
+            "$ref": "#/definitions/InfluxConfig"
+        },
+        "logging": {
+            "$ref": "#/definitions/LoggingOptions",
+            "description": "Settings to configure global logging defaults"
+        },
+        "mode": {
+            "default": "all",
+            "description": "Mode to run ContextMod in\n\n* `all` (default) - Run the api and the web interface\n* `client` - Run web interface only\n* `server` - Run the api/bots only",
+            "enum": [
+                "all",
+                "client",
+                "server"
+            ],
+            "type": "string"
+        },
+        "notifications": {
+            "$ref": "#/definitions/NotificationConfig",
+            "description": "Settings to configure 3rd party notifications for when ContextMod behavior occurs"
+        },
+        "operator": {
+            "description": "Settings related to the user(s) running this ContextMod instance and information on the bot",
+            "properties": {
+                "display": {
+                    "description": "A **public** name to display to users of the web interface. Use this to help moderators using your bot identify who is the operator in case they need to contact you.\n\nLeave undefined for no public name to be displayed.\n\n* ENV => `OPERATOR_DISPLAY`\n* ARG => `--operatorDisplay <name>`",
+                    "examples": [
+                        "Moderators of r/MySubreddit"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "The name, or names, of the Reddit accounts, without prefix, that the operators of this bot uses.\n\nThis is used for showing more information in the web interface IE show all logs/subreddits if even not a moderator.\n\nEX -- User is /u/FoxxMD then `\"name\": [\"FoxxMD\"]`\n\n* ENV => `OPERATOR` (if list, comma-delimited)\n* ARG => `--operator <name...>`",
+                    "examples": [
+                        [
+                            "FoxxMD",
+                            "AnotherUser"
+                        ]
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "snoowrap": {
+            "$ref": "#/definitions/SnoowrapOptions",
+            "description": "Set global snoowrap options as well as default snoowrap config for all bots that don't specify their own"
+        },
+        "userAgent": {
+            "description": "Added to the User-Agent information sent to reddit\n\nThis string will be added BETWEEN version and your bot name.\n\nEX: `myBranch` => `web:contextMod:v1.0.0-myBranch:BOT-/u/MyBotUser`\n\n* ENV => `USER_AGENT`",
+            "type": "string"
+        },
+        "web": {
+            "description": "Settings for the web interface",
+            "properties": {
+                "caching": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/CacheOptions"
+                        },
+                        {
+                            "enum": [
+                                "memory",
+                                "redis"
+                            ],
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Caching provider to use for session and invite data\n\nIf none is provided the top-level caching provider is used"
+                },
+                "clients": {
+                    "description": "A list of CM Servers this Client should connect to.\n\nIf not specified a default `BotConnection` for this instance is generated",
+                    "examples": [
+                        [
+                            {
+                                "host": "localhost:8095",
+                                "secret": "aRandomString"
+                            }
+                        ]
+                    ],
+                    "items": {
+                        "$ref": "#/definitions/BotConnection"
+                    },
+                    "type": "array"
+                },
+                "credentials": {
+                    "$ref": "#/definitions/WebCredentials",
+                    "description": "Separate credentials for the web interface can be provided when also running the api.\n\nAll properties not specified will default to values given in ENV/ARG credential properties\n\nRefer to the [required credentials table](https://github.com/FoxxMD/context-mod/blob/master/docs/operatorConfiguration.md#minimum-required-configuration) to see what is necessary for the web interface.",
+                    "examples": [
+                        {
+                            "clientId": "f4b4df1_9oiu",
+                            "clientSecret": "34v5q1c564_yt7",
+                            "redirectUri": "http://localhost:8085/callback"
+                        }
+                    ]
+                },
+                "databaseConfig": {
+                    "description": "Database backend to use for persistent WEB data\n\nIf none is provided the top-level database provider is used",
+                    "properties": {
+                        "connection": {
+                            "anyOf": [
+                                {
+                                    "additionalProperties": {},
+                                    "properties": {
+                                        "logging": {
+                                            "anyOf": [
+                                                {
+                                                    "items": {
+                                                        "enum": [
+                                                            "error",
+                                                            "info",
+                                                            "log",
+                                                            "migration",
+                                                            "query",
+                                                            "schema",
+                                                            "warn"
+                                                        ],
+                                                        "type": "string"
+                                                    },
+                                                    "type": "array"
+                                                },
+                                                {
+                                                    "enum": [
+                                                        "all",
+                                                        false,
+                                                        true
+                                                    ]
+                                                }
+                                            ],
+                                            "description": "Set the type of logging typeorm should output\n\nDefaults to errors, warnings, and schema (migration progress)"
+                                        },
+                                        "type": {
+                                            "$ref": "#/definitions/DatabaseDriverType"
+                                        }
+                                    },
+                                    "required": [
+                                        "type"
+                                    ],
+                                    "type": "object"
+                                },
+                                {
+                                    "enum": [
+                                        "better-sqlite3",
+                                        "mariadb",
+                                        "mysql",
+                                        "postgres",
+                                        "sqljs"
+                                    ],
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "migrations": {
+                            "$ref": "#/definitions/DatabaseMigrationOptions"
+                        }
+                    },
+                    "type": "object"
+                },
+                "logLevel": {
+                    "description": "The default log level to filter to in the web interface\n\nIf not specified or `null` will be same as global `logLevel`",
+                    "enum": [
+                        "debug",
+                        "error",
+                        "info",
+                        "verbose",
+                        "warn"
+                    ],
+                    "type": "string"
+                },
+                "maxLogs": {
+                    "default": 200,
+                    "description": "Maximum number of log statements to keep in memory for each subreddit",
+                    "examples": [
+                        200
+                    ],
+                    "type": "number"
+                },
+                "operators": {
+                    "description": "The name, or names, of the Reddit accounts, without prefix, that the operators of this **web interface** uses.\n\n**Note:** This is **not the same** as the top-level `operator` property. This allows specified users to see the status of all `clients` but **not** access to them -- that must still be specified in the `operator.name` property in the configuration of each bot.\n\n\nEX -- User is /u/FoxxMD then `\"name\": [\"FoxxMD\"]`",
+                    "examples": [
+                        [
+                            "FoxxMD",
+                            "AnotherUser"
+                        ]
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "port": {
+                    "default": 8085,
+                    "description": "The port for the web interface\n\n* ENV => `PORT`\n* ARG => `--port <number>`",
+                    "examples": [
+                        8085
+                    ],
+                    "type": "number"
+                },
+                "session": {
+                    "description": "Settings to configure the behavior of user sessions -- the session is what the web interface uses to identify logged in users.",
+                    "properties": {
+                        "maxAge": {
+                            "default": 86400,
+                            "description": "Number of seconds a session should be valid for.\n\nDefault is 1 day",
+                            "examples": [
+                                86400
+                            ],
+                            "type": "number"
+                        },
+                        "secret": {
+                            "description": "The secret value used to encrypt session data\n\nIf provider is persistent (`redis`) specifying a value here will ensure sessions are valid between application restarts\n\nWhen not present or `null` a random string is generated on application start",
+                            "examples": [
+                                "definitelyARandomString"
+                            ],
+                            "type": "string"
+                        },
+                        "storage": {
+                            "description": "Specify backend storage to use for persisting client sessions. If specified this will overwrite parent-level `storage` settings.\n\nMay be useful if using `database` for general web client storage but have heavy traffic and want sessions to be more performant (using `cache`)",
+                            "enum": [
+                                "cache",
+                                "database"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "storage": {
+                    "description": "Storage provider type to use for sessions and other web client specific data\n\nDefaults to `database` if none is provided\n\n* Specify `database` to use top-level database\n* Specify `cache` to use top-level cache\n\nNOTE: `database` should almost always be used. Cache would only be necessary if this instance experiences heavy traffic",
+                    "enum": [
+                        "cache",
+                        "database"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "type": "object"
+}
+

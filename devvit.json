@@ -1,0 +1,168 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "hexa-mod",
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "ContextMod status",
+        "description": "Show the installed migration scaffold status.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/status"
+      },
+      {
+        "label": "Validate ContextMod config",
+        "description": "Parse the configured ContextMod YAML or JSON5 without running actions.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/validate-config"
+      },
+      {
+        "label": "Run ContextMod check",
+        "description": "Run the migration scaffold against the selected item.",
+        "location": [
+          "comment",
+          "post"
+        ],
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/run-context-mod-check"
+      },
+      {
+        "label": "Run ContextMod moderation scan",
+        "description": "Scan modqueue and unmoderated queues through the migrated pipeline.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/run-moderation-scan"
+      },
+      {
+        "label": "Run ContextMod by permalink",
+        "description": "Run the migrated pipeline against a pasted post/comment permalink or thing ID.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/run-context-mod-by-permalink"
+      },
+      {
+        "label": "ContextMod test: comment fixture",
+        "description": "Create and evaluate a built-in comment fixture in dry-run mode.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/test-comment-fixture"
+      },
+      {
+        "label": "ContextMod test: submission fixture",
+        "description": "Create and evaluate a built-in submission fixture in dry-run mode.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/test-submission-fixture"
+      },
+      {
+        "label": "Open ContextMod Dashboard",
+        "description": "Open the web dashboard for ContextMod status and configuration.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/open-dashboard"
+      }
+    ]
+  },
+  "forms": {
+    "runContextModByPermalink": "/internal/form/run-context-mod-by-permalink-submit"
+  },
+  "triggers": {
+    "onAppInstall": "/internal/triggers/on-app-install",
+    "onAppUpgrade": "/internal/triggers/on-app-install",
+    "onCommentSubmit": "/internal/triggers/on-comment-submit",
+    "onPostSubmit": "/internal/triggers/on-post-submit"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  },
+  "scheduler": {
+    "tasks": {
+      "contextModDispatch": "/internal/scheduler/context-mod-dispatch",
+      "contextModModerationScan": "/internal/scheduler/context-mod-moderation-scan"
+    }
+  },
+  "permissions": {
+    "reddit": {
+      "enable": true,
+      "scope": "moderator"
+    },
+    "redis": true,
+    "http": {
+      "enable": true,
+      "domains": [
+        "discord.com",
+        "youtube.googleapis.com",
+        "i.redd.it",
+        "preview.redd.it",
+        "generativelanguage.googleapis.com"
+      ]
+    }
+  },
+  "settings": {
+    "subreddit": {
+      "enabled": {
+        "type": "boolean",
+        "label": "Enable event processing",
+        "helpText": "Keep disabled until migrated checks and actions have been verified in playtest.",
+        "defaultValue": false
+      },
+      "dryRun": {
+        "type": "boolean",
+        "label": "Dry run actions",
+        "helpText": "Evaluate rules without performing moderator actions.",
+        "defaultValue": true
+      },
+      "configWikiPage": {
+        "type": "string",
+        "label": "Configuration wiki page",
+        "helpText": "Relative subreddit wiki page containing the ContextMod YAML or JSON5 config.",
+        "defaultValue": "botconfig/contextbot"
+      },
+      "configText": {
+        "type": "paragraph",
+        "label": "Raw configuration override",
+        "helpText": "Optional YAML or JSON5 config text for playtests. If set, this is used instead of the wiki page.",
+        "defaultValue": ""
+      },
+      "moderationScanLimit": {
+        "type": "number",
+        "label": "Moderation scan item limit",
+        "helpText": "Maximum modqueue or unmoderated items to scan per scheduled run.",
+        "defaultValue": 25
+      },
+      "moderationScanIntervalMinutes": {
+        "type": "number",
+        "label": "Moderation scan interval minutes",
+        "helpText": "Minutes between scheduler-backed modqueue/unmoderated scans.",
+        "defaultValue": 10
+      },
+      "youtubeApiKey": {
+        "type": "string",
+        "label": "YouTube Data API Key",
+        "helpText": "Required for YouTube repost rule checks.",
+        "defaultValue": ""
+      },
+      "geminiApiKey": {
+        "type": "string",
+        "label": "Gemini API Key",
+        "helpText": "Required for toxicity classification rules.",
+        "defaultValue": ""
+      }
+    }
+  },
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "entry": "index.html",
+        "height": "tall"
+      }
+    }
+  }
+}

@@ -1,0 +1,3175 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "anyOf": [
+        {
+            "$ref": "#/definitions/IncludesData"
+        },
+        {
+            "$ref": "#/definitions/FlairActionJson"
+        },
+        {
+            "$ref": "#/definitions/UserFlairActionJson"
+        },
+        {
+            "$ref": "#/definitions/CommentActionJson"
+        },
+        {
+            "$ref": "#/definitions/ReportActionJson"
+        },
+        {
+            "$ref": "#/definitions/LockActionJson"
+        },
+        {
+            "$ref": "#/definitions/RemoveActionJson"
+        },
+        {
+            "$ref": "#/definitions/UserNoteActionJson"
+        },
+        {
+            "$ref": "#/definitions/ApproveActionJson"
+        },
+        {
+            "$ref": "#/definitions/BanActionJson"
+        },
+        {
+            "$ref": "#/definitions/MessageActionJson"
+        },
+        {
+            "$ref": "#/definitions/DispatchActionJson"
+        },
+        {
+            "$ref": "#/definitions/CancelDispatchActionJson"
+        },
+        {
+            "$ref": "#/definitions/ContributorActionJson"
+        },
+        {
+            "$ref": "#/definitions/ModNoteActionJson"
+        },
+        {
+            "$ref": "#/definitions/SubmissionActionJson"
+        },
+        {
+            "type": "string"
+        }
+    ],
+    "definitions": {
+        "ApproveActionJson": {
+            "description": "Ban the Author of the Activity this Check is run on",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "approve"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "targets": {
+                    "description": "Specify which Activities to approve\n\nThis setting is only applicable if the Activity being acted on is a **comment**. On a **submission** the setting does nothing\n\n* self => approve activity being checked (comment)\n* parent => approve parent (submission) of activity being checked (comment)",
+                    "items": {
+                        "enum": [
+                            "parent",
+                            "self"
+                        ],
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "type": "object"
+        },
+        "AuthorCriteria": {
+            "additionalProperties": false,
+            "description": "Criteria with which to test against the author of an Activity. The outcome of the test is based on:\n\n1. All present properties passing and\n2. If a property is a list then any value from the list matching",
+            "examples": [
+                {
+                    "flairText": [
+                        "Contributor",
+                        "Veteran"
+                    ],
+                    "isMod": true,
+                    "name": [
+                        "FoxxMD",
+                        "AnotherUser"
+                    ]
+                }
+            ],
+            "minProperties": 1,
+            "properties": {
+                "age": {
+                    "description": "Test the age of the Author's account (when it was created) against this comparison\n\nThe syntax is `(< OR > OR <= OR >=) <number> <unit>`\n\n* EX `> 100 days` => Passes if Author's account is older than 100 days\n* EX `<= 2 months` => Passes if Author's account is younger than or equal to 2 months\n\nUnit must be one of [DayJS Duration units](https://day.js.org/docs/en/durations/creating)\n\n[See] https://regexr.com/609n8 for example",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?)\\s*$",
+                    "type": "string"
+                },
+                "commentKarma": {
+                    "description": "A string containing a comparison operator and a value to compare karma against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign]`\n\n* EX `> 100`  => greater than 100 comment karma\n* EX `<= 75%` => comment karma is less than or equal to 75% of **all karma**",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "description": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "An (array of) string/regular expression to test contents of an Author's profile description against\n\nIf no flags are specified then the **insensitive** flag is used by default\n\nIf using an array then if **any** value in the array passes the description test passes",
+                    "examples": [
+                        [
+                            "/test$/i",
+                            "look for this string literal"
+                        ]
+                    ]
+                },
+                "flairBackgroundColor": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "The (user) flair background color (or list of) from the subreddit to match against\n\n* If `true` then passes if ANY css background color is assigned\n* If `false` then passes if NO css background is assigned\n* If string or list of strings then color is matched, case-insensitive, without #. String may also be a regular expression enclosed in forward slashes."
+                },
+                "flairCssClass": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "A (user) flair css class (or list of) from the subreddit to match against\n\n* If `true` then passes if ANY css is assigned\n* If `false` then passes if NO css is assigned\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes.",
+                    "examples": [
+                        "red"
+                    ]
+                },
+                "flairTemplate": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "A (user) flair template id (or list of) from the subreddit to match against\n\n* If `true` then passes if ANY template is assigned\n* If `false` then passed if NO template is assigned\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "flairText": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "A (user) flair text value (or list of) from the subreddit to match against\n\n* If `true` then passes if ANY text is assigned\n* If `false` then passes if NO text is assigned\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes.",
+                    "examples": [
+                        "Approved"
+                    ]
+                },
+                "isContributor": {
+                    "description": "Is the author an approved user (contributor)?",
+                    "type": "boolean"
+                },
+                "isMod": {
+                    "description": "Is the author a moderator?",
+                    "type": "boolean"
+                },
+                "linkKarma": {
+                    "description": "A string containing a comparison operator and a value to compare link karma against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign]`\n\n* EX `> 100`  => greater than 100 link karma\n* EX `<= 75%` => link karma is less than or equal to 75% of **all karma**",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "modActions": {
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/ModNoteCriteria"
+                            },
+                            {
+                                "$ref": "#/definitions/ModLogCriteria"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "name": {
+                    "description": "A list of reddit usernames (case-insensitive) or regular expressions to match against. Do not include the \"u/\" prefix\n\n\n EX to match against /u/FoxxMD and /u/AnotherUser use [\"FoxxMD\",\"AnotherUser\"]",
+                    "examples": [
+                        "FoxxMD",
+                        "AnotherUser",
+                        "/.*Foxx./*i"
+                    ],
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "shadowBanned": {
+                    "description": "Is the author shadowbanned?\n\nThis is determined by trying to retrieve the author's profile. If a 404 is returned it is likely they are shadowbanned",
+                    "type": "boolean"
+                },
+                "totalKarma": {
+                    "description": "A string containing a comparison operator and a value to compare against\n\nThe syntax is `(< OR > OR <= OR >=) <number>`\n\n* EX `> 100`  => greater than 100",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "userNotes": {
+                    "description": "A list of UserNote properties to check against the User Notes attached to this Author in this Subreddit (must have Toolbox enabled and used User Notes at least once)",
+                    "items": {
+                        "$ref": "#/definitions/UserNoteCriteria"
+                    },
+                    "type": "array"
+                },
+                "verified": {
+                    "description": "Does Author's account have a verified email?",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "BanActionJson": {
+            "description": "Ban the Author of the Activity this Check is run on",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "duration": {
+                    "description": "Number of days to ban the Author. If not specified Author will be banned permanently.",
+                    "examples": [
+                        90
+                    ],
+                    "maximum": 999,
+                    "minimum": 1,
+                    "type": "number"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "footer": {
+                    "anyOf": [
+                        {
+                            "enum": [
+                                false
+                            ],
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Customize the footer for Actions that send replies (Comment/Ban)\n\nIf `false` no footer is appended\n\nIf `string` the value is rendered as markdown or will use `wiki:` parser the same way `content` properties on Actions are rendered with [templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nIf footer is `undefined` (not set) the default footer will be used:\n\n> *****\n> This action was performed by [a bot.] Mention a moderator or [send a modmail] if you any ideas, questions, or concerns about this action.\n\n*****\n\nThe following properties are available for [templating](https://github.com/FoxxMD/context-mod#action-templating):\n```\nsubName    => name of subreddit Action was performed in (EX 'mealtimevideos')\npermaLink  => The permalink for the Activity the Action was performed on EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nmodmaiLink => An encoded URL that will open a new message to your subreddit with the Action permalink appended to the body\nbotLink    => A permalink to the FAQ for this bot.\n```\nIf you use your own footer or no footer **please link back to the bot FAQ** using the `{{botLink}}` property in your content :)"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "ban"
+                    ],
+                    "type": "string"
+                },
+                "message": {
+                    "description": "The message that is sent in the ban notification. `message` is interpreted as reddit-flavored Markdown.\n\nIf value starts with `wiki:` then the proceeding value will be used to get a wiki page\n\nEX `wiki:botconfig/mybot` tries to get `https://reddit.com/mySubredditExample/wiki/botconfig/mybot`\n\nEX `this is plain text` => \"this is plain text\"\n\nEX `this is **bold** markdown text` => \"this is **bold** markdown text\"",
+                    "examples": [
+                        "This is the content of a comment/report/usernote",
+                        "this is **bold** markdown text",
+                        "wiki:botconfig/acomment"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "note": {
+                    "description": "A mod note for this ban. Can use Templating.\n\nIf the length expands to more than 100 characters it will truncated with \"...\"",
+                    "examples": [
+                        "Sock puppet for u/AnotherUser"
+                    ],
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "Reason for ban. Can use Templating.\n\nIf the length expands to more than 100 characters it will truncated with \"...\"",
+                    "examples": [
+                        "repeat spam"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "type": "object"
+        },
+        "CancelDispatchActionJson": {
+            "description": "Remove the Activity",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "identifier": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    ]
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "cancelDispatch"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "target": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "any",
+                                    "parent",
+                                    "self"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "any",
+                                "parent",
+                                "self"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "kind",
+                "target"
+            ],
+            "type": "object"
+        },
+        "CommentActionJson": {
+            "description": "Reply to the Activity. For a submission the reply will be a top-level comment.",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "content": {
+                    "description": "The Content to submit for this Action. Content is interpreted as reddit-flavored Markdown.\n\nIf value starts with `wiki:` then the proceeding value will be used to get a wiki page from the current subreddit\n\n * EX `wiki:botconfig/mybot` tries to get `https://reddit.com/r/currentSubreddit/wiki/botconfig/mybot`\n\nIf the value starts with `wiki:` and ends with `|someValue` then `someValue` will be used as the base subreddit for the wiki page\n\n* EX `wiki:replytemplates/test|ContextModBot` tries to get `https://reddit.com/r/ContextModBot/wiki/replytemplates/test`\n\nIf the value starts with `url:` then the value is fetched as an external url and expects raw text returned\n\n* EX `url:https://pastebin.com/raw/38qfL7mL` tries to get the text response of `https://pastebin.com/raw/38qfL7mL`\n\nIf none of the above is used the value is treated as the raw context\n\n * EX `this is **bold** markdown text` => \"this is **bold** markdown text\"\n\nAll Content is rendered using [mustache](https://github.com/janl/mustache.js/#templates) to enable [Action Templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nThe following properties are always available in the template (view individual Rules to see rule-specific template data):\n```\nitem.kind      => The type of Activity that was checked (comment/submission)\nitem.author    => The name of the Author of the Activity EX FoxxMD\nitem.permalink => A permalink URL to the Activity EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nitem.url       => If the Activity is Link Sumbission then the external URL\nitem.title     => If the Activity is a Submission then the title of that Submission\nrules          => An object containing RuleResults of all the rules run for this check. See Action Templating for more details on naming\n```",
+                    "type": "string"
+                },
+                "distinguish": {
+                    "description": "Distinguish the comment after creation?",
+                    "type": "boolean"
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "footer": {
+                    "anyOf": [
+                        {
+                            "enum": [
+                                false
+                            ],
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Customize the footer for Actions that send replies (Comment/Ban)\n\nIf `false` no footer is appended\n\nIf `string` the value is rendered as markdown or will use `wiki:` parser the same way `content` properties on Actions are rendered with [templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nIf footer is `undefined` (not set) the default footer will be used:\n\n> *****\n> This action was performed by [a bot.] Mention a moderator or [send a modmail] if you any ideas, questions, or concerns about this action.\n\n*****\n\nThe following properties are available for [templating](https://github.com/FoxxMD/context-mod#action-templating):\n```\nsubName    => name of subreddit Action was performed in (EX 'mealtimevideos')\npermaLink  => The permalink for the Activity the Action was performed on EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nmodmaiLink => An encoded URL that will open a new message to your subreddit with the Action permalink appended to the body\nbotLink    => A permalink to the FAQ for this bot.\n```\nIf you use your own footer or no footer **please link back to the bot FAQ** using the `{{botLink}}` property in your content :)"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "comment"
+                    ],
+                    "type": "string"
+                },
+                "lock": {
+                    "description": "Lock the comment after creation?",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "sticky": {
+                    "description": "Stick the comment after creation?",
+                    "type": "boolean"
+                },
+                "targets": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Specify where this comment should be made\n\nValid values: 'self' | 'parent' | [reddit permalink]\n\n'self' and 'parent' are special targets that are relative to the Activity being processed:\n* When Activity is Submission => 'parent' does nothing\n* When Activity is Comment\n   * 'self' => reply to Activity\n   * 'parent' => make a top-level comment in the Submission the Comment is in\n\nIf target is not self/parent then CM assumes the value is a reddit permalink and will attempt to make a comment to that Activity"
+                }
+            },
+            "required": [
+                "content",
+                "kind"
+            ],
+            "type": "object"
+        },
+        "CommentState": {
+            "description": "Different attributes a `Comment` can be in. Only include a property if you want to check it.",
+            "examples": [
+                {
+                    "op": true,
+                    "removed": false
+                }
+            ],
+            "properties": {
+                "age": {
+                    "description": "A duration and how to compare it against a value\n\nThe syntax is `(< OR > OR <= OR >=) <number> <unit>` EX `> 100 days`, `<= 2 months`\n\n* EX `> 100 days` => Passes if the date being compared is before 100 days ago\n* EX `<= 2 months` => Passes if the date being compared is after or equal to 2 months\n\nUnit must be one of [DayJS Duration units](https://day.js.org/docs/en/durations/creating)\n\n[See] https://regexr.com/609n8 for example",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(days|weeks|months|years|hours|minutes|seconds|milliseconds)\\s*$",
+                    "type": "string"
+                },
+                "approved": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/ModeratorNameCriteria"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* true/false => test whether Activity is approved or not\n* string or list of strings => test which moderator approved this Activity"
+                },
+                "authorFlairBackgroundColor": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY color\n* If `false` then passes if NO color\n* If string or list of strings then color is matched, case-insensitive, without #. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairCssClass": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY class\n* If `false` then passes if NO class\n* If string or list of strings then class is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairTemplateId": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY flair\n* If `false` then passes if NO flair\n* If string or list of strings then template id is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairText": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY flair\n* If `false` then passes if NO flair\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "createdOn": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "A relative datetime description to match the date the Activity was created\n\nMay be either:\n\n* day of the week (monday, tuesday, etc...)\n* cron expression IE `* * 15 *`\n\nSee https://crontab.guru/ for generating expressions\n\nhttps://regexr.com/6u3cc"
+                },
+                "deleted": {
+                    "type": "boolean"
+                },
+                "depth": {
+                    "description": "The (nested) level of a comment.\n\n* 0 mean the comment is at top-level (replying to submission)\n* non-zero, Nth value means the comment has N parent comments",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(days|weeks|months|years|hours|minutes|seconds|milliseconds)\\s*$",
+                    "type": "string"
+                },
+                "dispatched": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "Test whether the activity is present in dispatched/delayed activities\n\nNOTE: This is DOES NOT mean that THIS activity is from dispatch -- just that it exists there. To test whether THIS activity is from dispatch use `source`\n\n* `true` => activity exists in delayed activities\n* `false` => activity DOES NOT exist in delayed activities\n* `string` => activity exists in delayed activities with given identifier\n* `string[]` => activity exists in delayed activities with any of the given identifiers"
+                },
+                "distinguished": {
+                    "type": "boolean"
+                },
+                "filtered": {
+                    "type": "boolean"
+                },
+                "locked": {
+                    "type": "boolean"
+                },
+                "op": {
+                    "description": "Is this Comment Author also the Author of the Submission this comment is in?",
+                    "type": "boolean"
+                },
+                "removed": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/ModeratorNameCriteria"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* true/false => test whether Activity is removed or not\n* string or list of strings => test which moderator removed this Activity"
+                },
+                "reports": {
+                    "description": "A string containing a comparison operator, a value to compare against, an (optional) report type filter, an (optional) qualifier for report reason, and an (optional) time constraint\n\nThe syntax is `(< OR > OR <= OR >=) number[%] [type] [reasonQualifier] [timeValue] [timeUnit]`\n\nIf only comparison and number is given then defaults to TOTAL reports on an Activity.\n\n* EX `> 2`  => greater than 2 total reports\n\nType (optional) determines which type of reports to look at:\n\n* `mod` -- mod reports\n  * EX `> 3 mod` => greater than 3 mod reports\n* `user` -- user reports\n  * EX `> 3 user` => greater than 3 user reports\n\nReport reason qualifiers can be:\n\n* enclosed double or single quotes -- report reason contains\n  * EX `> 1 \"misinformation\" => greater than 1 report with reason containing \"misinformation\"\n* enclosed in backslashes -- match regex\n  * EX `> 1 \\harassment towards .*\\` => greater than 1 report with reason matching regex \\harassment towards .*\\\n\nType and reason qualifiers can be used together:\n\nEX `> 2 user \"misinformation\" => greater than 2 user reports with reasons containing \"misinformation\"\n\nThe time constraint filter reports created between NOW and [timeConstraint] in the past:\n\n* `> 3 in 30 minutes` => more than 3 reports created between NOW and 30 minutes ago\n* `> 2 user \"misinformation\" in 2 hours` => more than 2 user reports containing \"misinformation\" created between NOW and 2 hours ago",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)(\\s*%)?(\\s+(?:mods?|users?))?(\\s+(?:[\"'].*[\"']|\\/.*\\/))?.*(\\d+)?\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?)?\\s*$",
+                    "type": "string"
+                },
+                "score": {
+                    "description": "A string containing a comparison operator and a value to compare against\n\nThe syntax is `(< OR > OR <= OR >=) <number>`\n\n* EX `> 100`  => greater than 100",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "source": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Test where the current activity was sourced from.\n\nA source can be any of:\n\n* `poll` => activity was retrieved from polling a queue (unmoderated, modqueue, etc...)\n* `poll:[pollSource]` => activity was retrieved from specific polling source IE `poll:unmoderated` activity comes from unmoderated queue\n  * valid sources: unmoderated modqueue newComm newSub\n* `dispatch` => activity is from Dispatch Action\n* `dispatch:[identifier]` => activity is from Dispatch Action with specific identifier\n* `user` => activity was from user input (web dashboard)"
+                },
+                "spam": {
+                    "type": "boolean"
+                },
+                "stickied": {
+                    "type": "boolean"
+                },
+                "submissionState": {
+                    "description": "A list of SubmissionState attributes to test the Submission this comment is in",
+                    "items": {
+                        "$ref": "#/definitions/SubmissionState"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "ContributorActionJson": {
+            "description": "Ban the Author of the Activity this Check is run on",
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/ContributorActionType"
+                },
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "contributor"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "action",
+                "kind"
+            ],
+            "type": "object"
+        },
+        "ContributorActionType": {
+            "enum": [
+                "add",
+                "remove"
+            ],
+            "type": "string"
+        },
+        "DispatchActionJson": {
+            "description": "Remove the Activity",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "cancelIfQueued": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "enum": [
+                                            "poll",
+                                            "poll:modqueue",
+                                            "poll:newComm",
+                                            "poll:newSub",
+                                            "poll:unmoderated",
+                                            "user"
+                                        ],
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                false,
+                                "poll",
+                                "poll:modqueue",
+                                "poll:newComm",
+                                "poll:newSub",
+                                "poll:unmoderated",
+                                true,
+                                "user"
+                            ]
+                        }
+                    ]
+                },
+                "delay": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/DurationObject"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "goto": {
+                    "type": "string"
+                },
+                "identifier": {
+                    "type": "string"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "dispatch"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "onExistingFound": {
+                    "enum": [
+                        "ignore",
+                        "replace",
+                        "skip"
+                    ],
+                    "type": "string"
+                },
+                "tardyTolerant": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/DurationObject"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ]
+                },
+                "target": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "parent",
+                                    "self"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "parent",
+                                "self"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "delay",
+                "kind",
+                "target"
+            ],
+            "type": "object"
+        },
+        "DurationObject": {
+            "additionalProperties": false,
+            "description": "A [Day.js duration object](https://day.js.org/docs/en/durations/creating)",
+            "examples": [
+                {
+                    "hours": 1,
+                    "minutes": 30
+                }
+            ],
+            "minProperties": 1,
+            "properties": {
+                "days": {
+                    "examples": [
+                        7
+                    ],
+                    "type": "number"
+                },
+                "hours": {
+                    "examples": [
+                        4
+                    ],
+                    "type": "number"
+                },
+                "minutes": {
+                    "examples": [
+                        50
+                    ],
+                    "type": "number"
+                },
+                "months": {
+                    "examples": [
+                        3
+                    ],
+                    "type": "number"
+                },
+                "seconds": {
+                    "examples": [
+                        15
+                    ],
+                    "type": "number"
+                },
+                "weeks": {
+                    "examples": [
+                        2
+                    ],
+                    "type": "number"
+                },
+                "years": {
+                    "examples": [
+                        0
+                    ],
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "FilterOptionsJson<AuthorCriteria>": {
+            "properties": {
+                "exclude": {
+                    "description": "Only runs if `include` is not present. Each Criteria is comprised of conditions that the filter (Author/Item) being checked must \"not\" pass. See excludeCondition for set behavior\n\nEX: `isMod: true, name: Automoderator` => Will pass if the Author IS NOT a mod and IS NOT named Automoderator",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/AuthorCriteria"
+                            },
+                            {
+                                "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "excludeCondition": {
+                    "default": "OR",
+                    "description": "* OR => if ANY exclude condition \"does not\" pass then the exclude test passes\n* AND => if ALL exclude conditions \"do not\" pass then the exclude test passes\n\nDefaults to OR",
+                    "enum": [
+                        "AND",
+                        "OR"
+                    ],
+                    "type": "string"
+                },
+                "include": {
+                    "description": "Will \"pass\" if any set of Criteria passes",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/AuthorCriteria"
+                            },
+                            {
+                                "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "FilterOptionsJson<TypedActivityState>": {
+            "properties": {
+                "exclude": {
+                    "description": "Only runs if `include` is not present. Each Criteria is comprised of conditions that the filter (Author/Item) being checked must \"not\" pass. See excludeCondition for set behavior\n\nEX: `isMod: true, name: Automoderator` => Will pass if the Author IS NOT a mod and IS NOT named Automoderator",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/SubmissionState"
+                            },
+                            {
+                                "$ref": "#/definitions/CommentState"
+                            },
+                            {
+                                "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                },
+                "excludeCondition": {
+                    "default": "OR",
+                    "description": "* OR => if ANY exclude condition \"does not\" pass then the exclude test passes\n* AND => if ALL exclude conditions \"do not\" pass then the exclude test passes\n\nDefaults to OR",
+                    "enum": [
+                        "AND",
+                        "OR"
+                    ],
+                    "type": "string"
+                },
+                "include": {
+                    "description": "Will \"pass\" if any set of Criteria passes",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/SubmissionState"
+                            },
+                            {
+                                "$ref": "#/definitions/CommentState"
+                            },
+                            {
+                                "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "FlairActionJson": {
+            "description": "Flair the Submission",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "css": {
+                    "description": "The text of the css class of the flair to apply",
+                    "type": "string"
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "flair_template_id": {
+                    "description": "Flair template ID to assign",
+                    "type": "string"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "flair"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "text": {
+                    "description": "The text of the flair to apply",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "type": "object"
+        },
+        "IncludesData": {
+            "properties": {
+                "path": {
+                    "description": "The special-form path to the config fragment to retrieve.\n\nIf value starts with `wiki:` then the proceeding value will be used to get a wiki page from the current subreddit\n\n * EX `wiki:botconfig/mybot` tries to get `https://reddit.com/r/currentSubreddit/wiki/botconfig/mybot`\n\nIf the value starts with `wiki:` and ends with `|someValue` then `someValue` will be used as the base subreddit for the wiki page\n\n* EX `wiki:replytemplates/test|ContextModBot` tries to get `https://reddit.com/r/ContextModBot/wiki/replytemplates/test`\n\nIf the value starts with `url:` then the value is fetched as an external url and expects raw text returned\n\n* EX `url:https://pastebin.com/raw/38qfL7mL` tries to get the text response of `https://pastebin.com/raw/38qfL7mL`",
+                    "type": "string"
+                },
+                "ttl": {
+                    "anyOf": [
+                        {
+                            "enum": [
+                                false,
+                                "response",
+                                true
+                            ]
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ],
+                    "description": "Control caching for the config fragment.\n\nIf not specified the value for `wikiTTL` will be used\n\n* If true then value is cached forever\n* If false then value is never cached\n* If a number then the number of seconds to cache value\n* If 'response' then CM will attempt to use Cache-Control or Expires headers from the response to determine how long to cache the value"
+                },
+                "type": {
+                    "description": "An unused hint about the content type. Not implemented yet",
+                    "enum": [
+                        "json",
+                        "yaml"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "path"
+            ],
+            "type": "object"
+        },
+        "LockActionJson": {
+            "description": "Lock the Activity",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "lock"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "type": "object"
+        },
+        "MessageActionJson": {
+            "description": "Send a private message to the Author of the Activity.",
+            "properties": {
+                "asSubreddit": {
+                    "description": "Should this message be sent from modmail (as the subreddit) or as the bot user?",
+                    "type": "boolean"
+                },
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "content": {
+                    "description": "The Content to submit for this Action. Content is interpreted as reddit-flavored Markdown.\n\nIf value starts with `wiki:` then the proceeding value will be used to get a wiki page from the current subreddit\n\n * EX `wiki:botconfig/mybot` tries to get `https://reddit.com/r/currentSubreddit/wiki/botconfig/mybot`\n\nIf the value starts with `wiki:` and ends with `|someValue` then `someValue` will be used as the base subreddit for the wiki page\n\n* EX `wiki:replytemplates/test|ContextModBot` tries to get `https://reddit.com/r/ContextModBot/wiki/replytemplates/test`\n\nIf the value starts with `url:` then the value is fetched as an external url and expects raw text returned\n\n* EX `url:https://pastebin.com/raw/38qfL7mL` tries to get the text response of `https://pastebin.com/raw/38qfL7mL`\n\nIf none of the above is used the value is treated as the raw context\n\n * EX `this is **bold** markdown text` => \"this is **bold** markdown text\"\n\nAll Content is rendered using [mustache](https://github.com/janl/mustache.js/#templates) to enable [Action Templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nThe following properties are always available in the template (view individual Rules to see rule-specific template data):\n```\nitem.kind      => The type of Activity that was checked (comment/submission)\nitem.author    => The name of the Author of the Activity EX FoxxMD\nitem.permalink => A permalink URL to the Activity EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nitem.url       => If the Activity is Link Sumbission then the external URL\nitem.title     => If the Activity is a Submission then the title of that Submission\nrules          => An object containing RuleResults of all the rules run for this check. See Action Templating for more details on naming\n```",
+                    "type": "string"
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "footer": {
+                    "anyOf": [
+                        {
+                            "enum": [
+                                false
+                            ],
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Customize the footer for Actions that send replies (Comment/Ban)\n\nIf `false` no footer is appended\n\nIf `string` the value is rendered as markdown or will use `wiki:` parser the same way `content` properties on Actions are rendered with [templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nIf footer is `undefined` (not set) the default footer will be used:\n\n> *****\n> This action was performed by [a bot.] Mention a moderator or [send a modmail] if you any ideas, questions, or concerns about this action.\n\n*****\n\nThe following properties are available for [templating](https://github.com/FoxxMD/context-mod#action-templating):\n```\nsubName    => name of subreddit Action was performed in (EX 'mealtimevideos')\npermaLink  => The permalink for the Activity the Action was performed on EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nmodmaiLink => An encoded URL that will open a new message to your subreddit with the Action permalink appended to the body\nbotLink    => A permalink to the FAQ for this bot.\n```\nIf you use your own footer or no footer **please link back to the bot FAQ** using the `{{botLink}}` property in your content :)"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "message"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "The title of the message\n\nIf not specified will be defaulted to `Concerning your [Submission/Comment]`",
+                    "type": "string"
+                },
+                "to": {
+                    "description": "Entity to send message to. It can be templated.\n\nIf not present Message be will sent to the Author of the Activity being checked.\n\nValid formats:\n\n* `aUserName` -- send to /u/aUserName\n* `u/aUserName` -- send to /u/aUserName\n* `r/aSubreddit` -- sent to modmail of /r/aSubreddit\n\n**Note:** Reddit does not support sending a message AS a subreddit TO another subreddit\n\n**Tip:** To send a message to the subreddit of the Activity us `to: 'r/{{item.subreddit}}'`",
+                    "examples": [
+                        "aUserName",
+                        "u/aUserName",
+                        "r/aSubreddit",
+                        "r/{{item.subreddit}}"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "asSubreddit",
+                "content",
+                "kind"
+            ],
+            "type": "object"
+        },
+        "ModLogCriteria": {
+            "properties": {
+                "action": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "activityType": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "comment",
+                                    false,
+                                    "submission"
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "comment",
+                                false,
+                                "submission"
+                            ]
+                        }
+                    ]
+                },
+                "count": {
+                    "default": ">= 1",
+                    "description": "Number of occurrences of this type. Ignored if `search` is `current`\n\nA string containing a comparison operator and/or a value to compare number of occurrences against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign] [in timeRange] [ascending|descending]`\n\nIf `timeRange` is given then only notes/mod actions that occur between timeRange and NOW will be returned. `timeRange` is ignored if search is `current`",
+                    "examples": [
+                        ">= 1"
+                    ],
+                    "pattern": "^\\s*(?<opStr>>|>=|<|<=)\\s*(?<value>\\d+)\\s*(?<percent>%?)\\s*(?<duration>in\\s+\\d+\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?))?\\s*(?<extra>asc.*|desc.*)*$",
+                    "type": "string"
+                },
+                "description": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "details": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "referencesCurrentActivity": {
+                    "type": "boolean"
+                },
+                "search": {
+                    "default": "current",
+                    "description": "How to test the Toolbox Notes or Mod Actions for this Author:\n\n### current\n\nOnly the most recent note is checked for criteria\n\n### total\n\n`count` comparison of mod actions/notes must be found within all history\n\n* EX `count: > 3`   => Must have more than 3 notes of `type`, total\n* EX `count: <= 25%` => Must have 25% or less of notes of `type`, total\n* EX: `count: > 3 in 1 week` => Must have more than 3 notes within the last week\n\n### consecutive\n\nThe `count` **number** of mod actions/notes must be found in a row.\n\nYou may also specify the time-based order in which to search the notes by specifying `ascending (asc)` or `descending (desc)` in the `count` value. Default is `descending`\n\n* EX `count: >= 3` => Must have 3 or more notes of `type` consecutively, in descending order\n* EX `count: < 2`  => Must have less than 2 notes of `type` consecutively, in descending order\n* EX `count: > 4 asc` => Must have greater than 4 notes of `type` consecutively, in ascending order",
+                    "enum": [
+                        "consecutive",
+                        "current",
+                        "total"
+                    ],
+                    "examples": [
+                        "current"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "APPROVAL",
+                                    "INVITE",
+                                    "NOTE",
+                                    "REMOVAL",
+                                    "SPAM"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "APPROVAL",
+                                "INVITE",
+                                "NOTE",
+                                "REMOVAL",
+                                "SPAM"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "ModNoteActionJson": {
+            "description": "Add a Toolbox User Note to the Author of this Activity",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "content": {
+                    "description": "The Content to submit for this Action. Content is interpreted as reddit-flavored Markdown.\n\nIf value starts with `wiki:` then the proceeding value will be used to get a wiki page from the current subreddit\n\n * EX `wiki:botconfig/mybot` tries to get `https://reddit.com/r/currentSubreddit/wiki/botconfig/mybot`\n\nIf the value starts with `wiki:` and ends with `|someValue` then `someValue` will be used as the base subreddit for the wiki page\n\n* EX `wiki:replytemplates/test|ContextModBot` tries to get `https://reddit.com/r/ContextModBot/wiki/replytemplates/test`\n\nIf the value starts with `url:` then the value is fetched as an external url and expects raw text returned\n\n* EX `url:https://pastebin.com/raw/38qfL7mL` tries to get the text response of `https://pastebin.com/raw/38qfL7mL`\n\nIf none of the above is used the value is treated as the raw context\n\n * EX `this is **bold** markdown text` => \"this is **bold** markdown text\"\n\nAll Content is rendered using [mustache](https://github.com/janl/mustache.js/#templates) to enable [Action Templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nThe following properties are always available in the template (view individual Rules to see rule-specific template data):\n```\nitem.kind      => The type of Activity that was checked (comment/submission)\nitem.author    => The name of the Author of the Activity EX FoxxMD\nitem.permalink => A permalink URL to the Activity EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nitem.url       => If the Activity is Link Sumbission then the external URL\nitem.title     => If the Activity is a Submission then the title of that Submission\nrules          => An object containing RuleResults of all the rules run for this check. See Action Templating for more details on naming\n```",
+                    "examples": [
+                        "This is the content of a comment/report/usernote",
+                        "this is **bold** markdown text",
+                        "wiki:botconfig/acomment"
+                    ],
+                    "type": "string"
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "existingNoteCheck": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ModNoteCriteria"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "default": true,
+                    "description": "Check if there is an existing Note matching some criteria before adding the Note.\n\nIf this check passes then the Note is added. The value may be a boolean or ModNoteCriteria.\n\nBoolean convenience:\n\n* If `true` or undefined then CM generates a ModNoteCriteria that passes only if there is NO existing note matching note criteria\n* If `false` then no check is performed and Note is always added",
+                    "examples": [
+                        true
+                    ]
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "modnote"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "referenceActivity": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "enum": [
+                        "ABUSE_WARNING",
+                        "BAN",
+                        "BOT_BAN",
+                        "HELPFUL_USER",
+                        "PERMA_BAN",
+                        "SOLID_CONTRIBUTOR",
+                        "SPAM_WARNING",
+                        "SPAM_WATCH"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "type": "object"
+        },
+        "ModNoteCriteria": {
+            "properties": {
+                "activityType": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "comment",
+                                    false,
+                                    "submission"
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "comment",
+                                false,
+                                "submission"
+                            ]
+                        }
+                    ]
+                },
+                "count": {
+                    "default": ">= 1",
+                    "description": "Number of occurrences of this type. Ignored if `search` is `current`\n\nA string containing a comparison operator and/or a value to compare number of occurrences against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign] [in timeRange] [ascending|descending]`\n\nIf `timeRange` is given then only notes/mod actions that occur between timeRange and NOW will be returned. `timeRange` is ignored if search is `current`",
+                    "examples": [
+                        ">= 1"
+                    ],
+                    "pattern": "^\\s*(?<opStr>>|>=|<|<=)\\s*(?<value>\\d+)\\s*(?<percent>%?)\\s*(?<duration>in\\s+\\d+\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?))?\\s*(?<extra>asc.*|desc.*)*$",
+                    "type": "string"
+                },
+                "note": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "noteType": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "ABUSE_WARNING",
+                                    "BAN",
+                                    "BOT_BAN",
+                                    "HELPFUL_USER",
+                                    "PERMA_BAN",
+                                    "SOLID_CONTRIBUTOR",
+                                    "SPAM_WARNING",
+                                    "SPAM_WATCH"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "ABUSE_WARNING",
+                                "BAN",
+                                "BOT_BAN",
+                                "HELPFUL_USER",
+                                "PERMA_BAN",
+                                "SOLID_CONTRIBUTOR",
+                                "SPAM_WARNING",
+                                "SPAM_WATCH"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                },
+                "referencesCurrentActivity": {
+                    "type": "boolean"
+                },
+                "search": {
+                    "default": "current",
+                    "description": "How to test the Toolbox Notes or Mod Actions for this Author:\n\n### current\n\nOnly the most recent note is checked for criteria\n\n### total\n\n`count` comparison of mod actions/notes must be found within all history\n\n* EX `count: > 3`   => Must have more than 3 notes of `type`, total\n* EX `count: <= 25%` => Must have 25% or less of notes of `type`, total\n* EX: `count: > 3 in 1 week` => Must have more than 3 notes within the last week\n\n### consecutive\n\nThe `count` **number** of mod actions/notes must be found in a row.\n\nYou may also specify the time-based order in which to search the notes by specifying `ascending (asc)` or `descending (desc)` in the `count` value. Default is `descending`\n\n* EX `count: >= 3` => Must have 3 or more notes of `type` consecutively, in descending order\n* EX `count: < 2`  => Must have less than 2 notes of `type` consecutively, in descending order\n* EX `count: > 4 asc` => Must have greater than 4 notes of `type` consecutively, in ascending order",
+                    "enum": [
+                        "consecutive",
+                        "current",
+                        "total"
+                    ],
+                    "examples": [
+                        "current"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "enum": [
+                                    "APPROVAL",
+                                    "INVITE",
+                                    "NOTE",
+                                    "REMOVAL",
+                                    "SPAM"
+                                ],
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "enum": [
+                                "APPROVAL",
+                                "INVITE",
+                                "NOTE",
+                                "REMOVAL",
+                                "SPAM"
+                            ],
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "ModeratorNameCriteria": {
+            "properties": {
+                "behavior": {
+                    "enum": [
+                        "exclude",
+                        "include"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "type": "object"
+        },
+        "NamedCriteria<AuthorCriteria>": {
+            "properties": {
+                "criteria": {
+                    "$ref": "#/definitions/AuthorCriteria"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "criteria"
+            ],
+            "type": "object"
+        },
+        "NamedCriteria<TypedActivityState>": {
+            "properties": {
+                "criteria": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SubmissionState"
+                        },
+                        {
+                            "$ref": "#/definitions/CommentState"
+                        }
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "criteria"
+            ],
+            "type": "object"
+        },
+        "RemoveActionJson": {
+            "description": "Remove the Activity",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "remove"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "note": {
+                    "description": "(Optional) A mod-readable note added to the removal reason for this Activity. Can use Templating.\n\nThis note (and removal reasons) are only visible on New Reddit",
+                    "type": "string"
+                },
+                "reasonId": {
+                    "description": "(Optional) The ID of the Removal Reason to use\n\nRemoval reasons are only visible on New Reddit\n\nTo find IDs for removal reasons check the \"Removal Reasons\" popup located in the CM dashboard config editor for your subreddit\n\nMore info on Removal Reasons: https://mods.reddithelp.com/hc/en-us/articles/360010094892-Removal-Reasons",
+                    "type": "string"
+                },
+                "spam": {
+                    "description": "(Optional) Mark Activity as spam",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "type": "object"
+        },
+        "ReportActionJson": {
+            "description": "Report the Activity",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "content": {
+                    "description": "The Content to submit for this Action. Content is interpreted as reddit-flavored Markdown.\n\nIf value starts with `wiki:` then the proceeding value will be used to get a wiki page from the current subreddit\n\n * EX `wiki:botconfig/mybot` tries to get `https://reddit.com/r/currentSubreddit/wiki/botconfig/mybot`\n\nIf the value starts with `wiki:` and ends with `|someValue` then `someValue` will be used as the base subreddit for the wiki page\n\n* EX `wiki:replytemplates/test|ContextModBot` tries to get `https://reddit.com/r/ContextModBot/wiki/replytemplates/test`\n\nIf the value starts with `url:` then the value is fetched as an external url and expects raw text returned\n\n* EX `url:https://pastebin.com/raw/38qfL7mL` tries to get the text response of `https://pastebin.com/raw/38qfL7mL`\n\nIf none of the above is used the value is treated as the raw context\n\n * EX `this is **bold** markdown text` => \"this is **bold** markdown text\"\n\nAll Content is rendered using [mustache](https://github.com/janl/mustache.js/#templates) to enable [Action Templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nThe following properties are always available in the template (view individual Rules to see rule-specific template data):\n```\nitem.kind      => The type of Activity that was checked (comment/submission)\nitem.author    => The name of the Author of the Activity EX FoxxMD\nitem.permalink => A permalink URL to the Activity EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nitem.url       => If the Activity is Link Sumbission then the external URL\nitem.title     => If the Activity is a Submission then the title of that Submission\nrules          => An object containing RuleResults of all the rules run for this check. See Action Templating for more details on naming\n```",
+                    "examples": [
+                        "This is the content of a comment/report/usernote",
+                        "this is **bold** markdown text",
+                        "wiki:botconfig/acomment"
+                    ],
+                    "type": "string"
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "report"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "type": "object"
+        },
+        "SubmissionActionJson": {
+            "description": "Reply to the Activity. For a submission the reply will be a top-level comment.",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "content": {
+                    "description": "The Content to submit for this Action. Content is interpreted as reddit-flavored Markdown.\n\nIf value starts with `wiki:` then the proceeding value will be used to get a wiki page from the current subreddit\n\n * EX `wiki:botconfig/mybot` tries to get `https://reddit.com/r/currentSubreddit/wiki/botconfig/mybot`\n\nIf the value starts with `wiki:` and ends with `|someValue` then `someValue` will be used as the base subreddit for the wiki page\n\n* EX `wiki:replytemplates/test|ContextModBot` tries to get `https://reddit.com/r/ContextModBot/wiki/replytemplates/test`\n\nIf the value starts with `url:` then the value is fetched as an external url and expects raw text returned\n\n* EX `url:https://pastebin.com/raw/38qfL7mL` tries to get the text response of `https://pastebin.com/raw/38qfL7mL`\n\nIf none of the above is used the value is treated as the raw context\n\n * EX `this is **bold** markdown text` => \"this is **bold** markdown text\"\n\nAll Content is rendered using [mustache](https://github.com/janl/mustache.js/#templates) to enable [Action Templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nThe following properties are always available in the template (view individual Rules to see rule-specific template data):\n```\nitem.kind      => The type of Activity that was checked (comment/submission)\nitem.author    => The name of the Author of the Activity EX FoxxMD\nitem.permalink => A permalink URL to the Activity EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nitem.url       => If the Activity is Link Sumbission then the external URL\nitem.title     => If the Activity is a Submission then the title of that Submission\nrules          => An object containing RuleResults of all the rules run for this check. See Action Templating for more details on naming\n```",
+                    "examples": [
+                        "This is the content of a comment/report/usernote",
+                        "this is **bold** markdown text",
+                        "wiki:botconfig/acomment"
+                    ],
+                    "type": "string"
+                },
+                "distinguish": {
+                    "description": "Distinguish as Mod after creation?",
+                    "type": "boolean"
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "flairId": {
+                    "description": "Flair template to apply to this Submission",
+                    "type": "string"
+                },
+                "flairText": {
+                    "description": "Flair text to apply to this Submission",
+                    "type": "string"
+                },
+                "footer": {
+                    "anyOf": [
+                        {
+                            "enum": [
+                                false
+                            ],
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Customize the footer for Actions that send replies (Comment/Ban)\n\nIf `false` no footer is appended\n\nIf `string` the value is rendered as markdown or will use `wiki:` parser the same way `content` properties on Actions are rendered with [templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nIf footer is `undefined` (not set) the default footer will be used:\n\n> *****\n> This action was performed by [a bot.] Mention a moderator or [send a modmail] if you any ideas, questions, or concerns about this action.\n\n*****\n\nThe following properties are available for [templating](https://github.com/FoxxMD/context-mod#action-templating):\n```\nsubName    => name of subreddit Action was performed in (EX 'mealtimevideos')\npermaLink  => The permalink for the Activity the Action was performed on EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nmodmaiLink => An encoded URL that will open a new message to your subreddit with the Action permalink appended to the body\nbotLink    => A permalink to the FAQ for this bot.\n```\nIf you use your own footer or no footer **please link back to the bot FAQ** using the `{{botLink}}` property in your content :)"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "submission"
+                    ],
+                    "type": "string"
+                },
+                "lock": {
+                    "description": "Lock the Submission after creation?",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "nsfw": {
+                    "type": "boolean"
+                },
+                "spoiler": {
+                    "type": "boolean"
+                },
+                "sticky": {
+                    "description": "Sticky the Submission after creation?",
+                    "type": "boolean"
+                },
+                "targets": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Specify where this Submission should be made\n\nValid values: 'self' | [subreddit]\n\n* 'self' -- DEFAULT. Post Submission to same subreddit of Activity being processed\n* [subreddit] -- The name of a subreddit to post Submission to. EX mealtimevideos"
+                },
+                "title": {
+                    "description": "The title of this Submission.\n\nTemplated the same as **content**",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "If Submission should be a Link, the URL to use\n\nTemplated the same as **content**\n\nPROTIP: To make a Link Submission pointing to the Activity being processed use `{{item.permalink}}` as the URL value",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind",
+                "title"
+            ],
+            "type": "object"
+        },
+        "SubmissionState": {
+            "description": "Different attributes a `Submission` can be in. Only include a property if you want to check it.",
+            "examples": [
+                {
+                    "over_18": true,
+                    "removed": false
+                }
+            ],
+            "properties": {
+                "age": {
+                    "description": "A duration and how to compare it against a value\n\nThe syntax is `(< OR > OR <= OR >=) <number> <unit>` EX `> 100 days`, `<= 2 months`\n\n* EX `> 100 days` => Passes if the date being compared is before 100 days ago\n* EX `<= 2 months` => Passes if the date being compared is after or equal to 2 months\n\nUnit must be one of [DayJS Duration units](https://day.js.org/docs/en/durations/creating)\n\n[See] https://regexr.com/609n8 for example",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(days|weeks|months|years|hours|minutes|seconds|milliseconds)\\s*$",
+                    "type": "string"
+                },
+                "approved": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/ModeratorNameCriteria"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* true/false => test whether Activity is approved or not\n* string or list of strings => test which moderator approved this Activity"
+                },
+                "authorFlairBackgroundColor": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY color\n* If `false` then passes if NO color\n* If string or list of strings then color is matched, case-insensitive, without #. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairCssClass": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY class\n* If `false` then passes if NO class\n* If string or list of strings then class is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairTemplateId": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY flair\n* If `false` then passes if NO flair\n* If string or list of strings then template id is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "authorFlairText": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY flair\n* If `false` then passes if NO flair\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "createdOn": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "A relative datetime description to match the date the Activity was created\n\nMay be either:\n\n* day of the week (monday, tuesday, etc...)\n* cron expression IE `* * 15 *`\n\nSee https://crontab.guru/ for generating expressions\n\nhttps://regexr.com/6u3cc"
+                },
+                "deleted": {
+                    "type": "boolean"
+                },
+                "dispatched": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "Test whether the activity is present in dispatched/delayed activities\n\nNOTE: This is DOES NOT mean that THIS activity is from dispatch -- just that it exists there. To test whether THIS activity is from dispatch use `source`\n\n* `true` => activity exists in delayed activities\n* `false` => activity DOES NOT exist in delayed activities\n* `string` => activity exists in delayed activities with given identifier\n* `string[]` => activity exists in delayed activities with any of the given identifiers"
+                },
+                "distinguished": {
+                    "type": "boolean"
+                },
+                "filtered": {
+                    "type": "boolean"
+                },
+                "flairTemplate": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if there is ANY flair template id\n* If `false` then passes if there is NO flair template id"
+                },
+                "isRedditMediaDomain": {
+                    "description": "Is the submission a reddit-hosted image or video?",
+                    "type": "boolean"
+                },
+                "is_self": {
+                    "type": "boolean"
+                },
+                "link_flair_background_color": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if ANY color\n* If `false` then passes if NO color\n* If string or list of strings then color is matched, case-insensitive, without #. String may also be a regular expression enclosed in forward slashes."
+                },
+                "link_flair_css_class": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if flair has ANY css\n* If `false` then passes if flair has NO css\n* If string or list of strings then class is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "link_flair_text": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* If `true` then passes if flair has ANY text\n* If `false` then passes if flair has NO text\n* If string or list of strings then text is matched, case-insensitive. String may also be a regular expression enclosed in forward slashes."
+                },
+                "locked": {
+                    "type": "boolean"
+                },
+                "over_18": {
+                    "description": "NSFW",
+                    "type": "boolean"
+                },
+                "pinned": {
+                    "type": "boolean"
+                },
+                "removed": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/ModeratorNameCriteria"
+                        },
+                        {
+                            "type": [
+                                "string",
+                                "boolean"
+                            ]
+                        }
+                    ],
+                    "description": "* true/false => test whether Activity is removed or not\n* string or list of strings => test which moderator removed this Activity"
+                },
+                "reports": {
+                    "description": "A string containing a comparison operator, a value to compare against, an (optional) report type filter, an (optional) qualifier for report reason, and an (optional) time constraint\n\nThe syntax is `(< OR > OR <= OR >=) number[%] [type] [reasonQualifier] [timeValue] [timeUnit]`\n\nIf only comparison and number is given then defaults to TOTAL reports on an Activity.\n\n* EX `> 2`  => greater than 2 total reports\n\nType (optional) determines which type of reports to look at:\n\n* `mod` -- mod reports\n  * EX `> 3 mod` => greater than 3 mod reports\n* `user` -- user reports\n  * EX `> 3 user` => greater than 3 user reports\n\nReport reason qualifiers can be:\n\n* enclosed double or single quotes -- report reason contains\n  * EX `> 1 \"misinformation\" => greater than 1 report with reason containing \"misinformation\"\n* enclosed in backslashes -- match regex\n  * EX `> 1 \\harassment towards .*\\` => greater than 1 report with reason matching regex \\harassment towards .*\\\n\nType and reason qualifiers can be used together:\n\nEX `> 2 user \"misinformation\" => greater than 2 user reports with reasons containing \"misinformation\"\n\nThe time constraint filter reports created between NOW and [timeConstraint] in the past:\n\n* `> 3 in 30 minutes` => more than 3 reports created between NOW and 30 minutes ago\n* `> 2 user \"misinformation\" in 2 hours` => more than 2 user reports containing \"misinformation\" created between NOW and 2 hours ago",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)(\\s*%)?(\\s+(?:mods?|users?))?(\\s+(?:[\"'].*[\"']|\\/.*\\/))?.*(\\d+)?\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?)?\\s*$",
+                    "type": "string"
+                },
+                "score": {
+                    "description": "A string containing a comparison operator and a value to compare against\n\nThe syntax is `(< OR > OR <= OR >=) <number>`\n\n* EX `> 100`  => greater than 100",
+                    "pattern": "^\\s*(>|>=|<|<=)\\s*(\\d+)\\s*(%?)(.*)$",
+                    "type": "string"
+                },
+                "source": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Test where the current activity was sourced from.\n\nA source can be any of:\n\n* `poll` => activity was retrieved from polling a queue (unmoderated, modqueue, etc...)\n* `poll:[pollSource]` => activity was retrieved from specific polling source IE `poll:unmoderated` activity comes from unmoderated queue\n  * valid sources: unmoderated modqueue newComm newSub\n* `dispatch` => activity is from Dispatch Action\n* `dispatch:[identifier]` => activity is from Dispatch Action with specific identifier\n* `user` => activity was from user input (web dashboard)"
+                },
+                "spam": {
+                    "type": "boolean"
+                },
+                "spoiler": {
+                    "type": "boolean"
+                },
+                "stickied": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "description": "A valid regular expression to match against the title of the submission",
+                    "type": "string"
+                },
+                "upvoteRatio": {
+                    "description": "Compare the upvote ratio for this Submission, expressed as a whole number\n\nCan be either a comparison string or a number. If a number then CM assumes upvote ratio must be greater than or equal to this.\n\nExample:\n\n* `< 90` => less than 90% upvoted\n* 45 => greater than or equal to 45% upvoted",
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "UserFlairActionJson": {
+            "description": "Flair the Submission",
+            "properties": {
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "css": {
+                    "description": "The text of the css class of the flair to apply",
+                    "type": "string"
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "flair_template_id": {
+                    "description": "Flair template to pick.\n\n**Note:** If this template is used text/css are ignored",
+                    "type": "string"
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "userflair"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "text": {
+                    "description": "The text of the flair to apply",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind"
+            ],
+            "type": "object"
+        },
+        "UserNoteActionJson": {
+            "description": "Add a Toolbox User Note to the Author of this Activity",
+            "properties": {
+                "allowDuplicate": {
+                    "default": false,
+                    "description": "Add Note even if a Note already exists for this Activity\n\nUSE `existingNoteCheck` INSTEAD",
+                    "examples": [
+                        false
+                    ],
+                    "type": "boolean"
+                },
+                "authorIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/AuthorCriteria"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<AuthorCriteria>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<AuthorCriteria>"
+                        }
+                    ],
+                    "description": "If present then these Author criteria are checked before running the Check. If criteria fails then the Check will fail."
+                },
+                "content": {
+                    "description": "The Content to submit for this Action. Content is interpreted as reddit-flavored Markdown.\n\nIf value starts with `wiki:` then the proceeding value will be used to get a wiki page from the current subreddit\n\n * EX `wiki:botconfig/mybot` tries to get `https://reddit.com/r/currentSubreddit/wiki/botconfig/mybot`\n\nIf the value starts with `wiki:` and ends with `|someValue` then `someValue` will be used as the base subreddit for the wiki page\n\n* EX `wiki:replytemplates/test|ContextModBot` tries to get `https://reddit.com/r/ContextModBot/wiki/replytemplates/test`\n\nIf the value starts with `url:` then the value is fetched as an external url and expects raw text returned\n\n* EX `url:https://pastebin.com/raw/38qfL7mL` tries to get the text response of `https://pastebin.com/raw/38qfL7mL`\n\nIf none of the above is used the value is treated as the raw context\n\n * EX `this is **bold** markdown text` => \"this is **bold** markdown text\"\n\nAll Content is rendered using [mustache](https://github.com/janl/mustache.js/#templates) to enable [Action Templating](https://github.com/FoxxMD/context-mod#action-templating).\n\nThe following properties are always available in the template (view individual Rules to see rule-specific template data):\n```\nitem.kind      => The type of Activity that was checked (comment/submission)\nitem.author    => The name of the Author of the Activity EX FoxxMD\nitem.permalink => A permalink URL to the Activity EX https://reddit.com/r/yourSub/comments/o1h0i0/title_name/1v3b7x\nitem.url       => If the Activity is Link Sumbission then the external URL\nitem.title     => If the Activity is a Submission then the title of that Submission\nrules          => An object containing RuleResults of all the rules run for this check. See Action Templating for more details on naming\n```",
+                    "examples": [
+                        "This is the content of a comment/report/usernote",
+                        "this is **bold** markdown text",
+                        "wiki:botconfig/acomment"
+                    ],
+                    "type": "string"
+                },
+                "dryRun": {
+                    "default": false,
+                    "description": "If `true` the Action will not make the API request to Reddit to perform its action.",
+                    "examples": [
+                        false,
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "enable": {
+                    "default": true,
+                    "description": "If set to `false` the Action will not be run",
+                    "examples": [
+                        true
+                    ],
+                    "type": "boolean"
+                },
+                "existingNoteCheck": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/UserNoteCriteria"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "default": true,
+                    "description": "Check if there is an existing Note matching some criteria before adding the Note.\n\nIf this check passes then the Note is added. The value may be a boolean or UserNoteCriteria.\n\nBoolean convenience:\n\n* If `true` or undefined then CM generates a UserNoteCriteria that passes only if there is NO existing note matching note criteria\n* If `false` then no check is performed and Note is always added",
+                    "examples": [
+                        true
+                    ]
+                },
+                "itemIs": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/SubmissionState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/CommentState"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/NamedCriteria<TypedActivityState>"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "$ref": "#/definitions/FilterOptionsJson<TypedActivityState>"
+                        }
+                    ],
+                    "description": "A list of criteria to test the state of the `Activity` against before running the check.\n\nIf any set of criteria passes the Check will be run. If the criteria fails then the Check will fail.\n\n* @examples [[{\"over_18\": true, \"removed': false}]]"
+                },
+                "kind": {
+                    "description": "The type of action that will be performed",
+                    "enum": [
+                        "usernote"
+                    ],
+                    "type": "string"
+                },
+                "name": {
+                    "description": "An optional, but highly recommended, friendly name for this Action. If not present will default to `kind`.\n\nCan only contain letters, numbers, underscore, spaces, and dashes",
+                    "examples": [
+                        "myDescriptiveAction"
+                    ],
+                    "pattern": "^[a-zA-Z]([\\w -]*[\\w])?$",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "User Note type key",
+                    "examples": [
+                        "spamwarn"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "kind",
+                "type"
+            ],
+            "type": "object"
+        },
+        "UserNoteCriteria": {
+            "properties": {
+                "count": {
+                    "default": ">= 1",
+                    "description": "Number of occurrences of this type. Ignored if `search` is `current`\n\nA string containing a comparison operator and/or a value to compare number of occurrences against\n\nThe syntax is `(< OR > OR <= OR >=) <number>[percent sign] [in timeRange] [ascending|descending]`\n\nIf `timeRange` is given then only notes/mod actions that occur between timeRange and NOW will be returned. `timeRange` is ignored if search is `current`",
+                    "examples": [
+                        ">= 1"
+                    ],
+                    "pattern": "^\\s*(?<opStr>>|>=|<|<=)\\s*(?<value>\\d+)\\s*(?<percent>%?)\\s*(?<duration>in\\s+\\d+\\s*(days?|weeks?|months?|years?|hours?|minutes?|seconds?|milliseconds?))?\\s*(?<extra>asc.*|desc.*)*$",
+                    "type": "string"
+                },
+                "note": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "The content of the Note to search For.\n\n* Can be a single string or list of strings to search for. Each string will be searched for case-insensitive, as a subset of note content.\n* Can also be Regular Expression if wrapped in forward slashes IE '\\/test.*\\/i'"
+                },
+                "referencesCurrentActivity": {
+                    "type": "boolean"
+                },
+                "search": {
+                    "default": "current",
+                    "description": "How to test the Toolbox Notes or Mod Actions for this Author:\n\n### current\n\nOnly the most recent note is checked for criteria\n\n### total\n\n`count` comparison of mod actions/notes must be found within all history\n\n* EX `count: > 3`   => Must have more than 3 notes of `type`, total\n* EX `count: <= 25%` => Must have 25% or less of notes of `type`, total\n* EX: `count: > 3 in 1 week` => Must have more than 3 notes within the last week\n\n### consecutive\n\nThe `count` **number** of mod actions/notes must be found in a row.\n\nYou may also specify the time-based order in which to search the notes by specifying `ascending (asc)` or `descending (desc)` in the `count` value. Default is `descending`\n\n* EX `count: >= 3` => Must have 3 or more notes of `type` consecutively, in descending order\n* EX `count: < 2`  => Must have less than 2 notes of `type` consecutively, in descending order\n* EX `count: > 4 asc` => Must have greater than 4 notes of `type` consecutively, in ascending order",
+                    "enum": [
+                        "consecutive",
+                        "current",
+                        "total"
+                    ],
+                    "examples": [
+                        "current"
+                    ],
+                    "type": "string"
+                },
+                "type": {
+                    "description": "User Note type key to search for",
+                    "examples": [
+                        "spamwarn"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "type": "object"
+        }
+    }
+}
+
