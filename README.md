@@ -1,5 +1,6 @@
 # ContextMod Devvit Port
 
+*(Click the image below to play the demo video)*<br/>
 [![ContextMod Devvit Demo](https://img.youtube.com/vi/onKKjmyEsHo/maxresdefault.jpg)](https://www.youtube.com/watch?v=onKKjmyEsHo)
 
 ContextMod Devvit is the Reddit Devvit migration of the legacy
