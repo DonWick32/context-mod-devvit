@@ -1,5 +1,11 @@
 # ContextMod Devvit Port
 
+![Screenshot 1](https://github.com/user-attachments/assets/c5bae380-0ee1-4915-a162-a8ec7ef0f8f0)
+![Screenshot 2](https://github.com/user-attachments/assets/d184d943-0343-4e8a-9642-e59a18f72363)
+![Screenshot 3](https://github.com/user-attachments/assets/41cbfb88-e273-4985-b4a0-29f017803fc8)
+![Screenshot 4](https://github.com/user-attachments/assets/03cea051-a325-45f9-97de-09e509bf2f77)
+![Screenshot 5](https://github.com/user-attachments/assets/07913e9f-f300-494a-b04a-203eb3a344f2)
+
 ContextMod Devvit is the Reddit Devvit migration of the legacy
 [`old/context-mod`](../../old/context-mod) moderation bot.
 
