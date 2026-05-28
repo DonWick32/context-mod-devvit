@@ -1,10 +1,6 @@
 # ContextMod Devvit Port
 
-![Screenshot 1](https://github.com/user-attachments/assets/c5bae380-0ee1-4915-a162-a8ec7ef0f8f0)
-![Screenshot 2](https://github.com/user-attachments/assets/d184d943-0343-4e8a-9642-e59a18f72363)
-![Screenshot 3](https://github.com/user-attachments/assets/41cbfb88-e273-4985-b4a0-29f017803fc8)
-![Screenshot 4](https://github.com/user-attachments/assets/03cea051-a325-45f9-97de-09e509bf2f77)
-![Screenshot 5](https://github.com/user-attachments/assets/07913e9f-f300-494a-b04a-203eb3a344f2)
+[![ContextMod Devvit Demo](https://img.youtube.com/vi/onKKjmyEsHo/maxresdefault.jpg)](https://www.youtube.com/watch?v=onKKjmyEsHo)
 
 ContextMod Devvit is the Reddit Devvit migration of the legacy
 [`old/context-mod`](../../old/context-mod) moderation bot.
@@ -307,37 +303,13 @@ Current views:
 - **Operations**: available dashboard operations and legacy-only controls that
   now map to Devvit settings.
 
-> **UI screenshot placeholder: dashboard overview**
->
-> Add an image at `docs/images/devvit-dashboard-overview.png`, then insert:
->
-> ```md
-> ![ContextMod Devvit dashboard overview](docs/images/devvit-dashboard-overview.png)
-> ```
+![ContextMod Devvit dashboard overview](docs/overview.jpeg)
 
-> **UI screenshot placeholder: config editor**
->
-> Add an image at `docs/images/devvit-config-editor.png`, then insert:
->
-> ```md
-> ![ContextMod Devvit config editor with validation](docs/images/devvit-config-editor.png)
-> ```
+![ContextMod Devvit config editor with validation](docs/yaml_editor.jpeg)
 
-> **UI screenshot placeholder: audit log**
->
-> Add an image at `docs/images/devvit-audit-log.png`, then insert:
->
-> ```md
-> ![ContextMod Devvit audit log](docs/images/devvit-audit-log.png)
-> ```
+![ContextMod Devvit audit log](docs/audit_logs.jpeg)
 
-> **UI screenshot placeholder: dispatch queue**
->
-> Add an image at `docs/images/devvit-dispatch-queue.png`, then insert:
->
-> ```md
-> ![ContextMod Devvit dispatch queue](docs/images/devvit-dispatch-queue.png)
-> ```
+![ContextMod Devvit dispatch queue](docs/dispatch_queue.jpeg)
 
 ## Commands
 
