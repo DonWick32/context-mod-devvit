@@ -27,7 +27,7 @@
     "ag-grid-community": "^35.3.0",
     "ag-grid-react": "^35.3.0",
     "devvit": "0.12.24",
-    "hono": "4.12.21",
+    "hono": "4.12.23",
     "jpeg-js": "^0.4.4",
     "json5": "^2.2.3",
     "jsonschema": "^1.4.1",
