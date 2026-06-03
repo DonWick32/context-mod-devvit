@@ -34,7 +34,7 @@
     "monaco-editor": "^0.55.1",
     "monaco-yaml": "^5.5.0",
     "pngjs": "^7.0.0",
-    "react": "^19.2.6",
+    "react": "^19.2.7",
     "react-dom": "^19.2.6",
     "vader-sentiment": "^1.1.3",
     "yaml": "^2.9.0"
